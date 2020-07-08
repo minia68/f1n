@@ -10,11 +10,13 @@ import 'package:animations/animations.dart';
 class ArticlesScreen extends StatefulWidget {
   final F1nHome f1nResponse;
   final F1nProvider client;
+  final VoidCallback onRefresh;
 
   const ArticlesScreen({
     Key key,
     @required this.f1nResponse,
     @required this.client,
+    @required this.onRefresh,
   }) : super(key: key);
 
   @override
@@ -38,13 +40,25 @@ class ArticlesScreenState extends State<ArticlesScreen>
       slivers: <Widget>[
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Главное',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Главное',
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: widget.onRefresh,
+                ),
+              ],
             ),
           ),
         ),
@@ -79,7 +93,8 @@ class ArticlesScreenState extends State<ArticlesScreen>
             ),
           )),
         ),
-        SliverToBoxAdapter( // TODO possible change to translate
+        SliverToBoxAdapter(
+          // TODO possible change to translate
           child: PlayAnimation<double>(
             duration: Duration(milliseconds: 200),
             tween: Tween(begin: 0.6, end: 0.0),

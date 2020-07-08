@@ -44,8 +44,8 @@ class SplashScreenState extends State<SplashScreen> {
                 height: 16.0,
               ),
               RaisedButton(
-                onPressed: () => f1nResponse = client.getHomePage(),
-                child: Text('Refresh'),
+                onPressed: _refresh,
+                child: Text('Обновить'),
               ),
             ],
           );
@@ -73,6 +73,7 @@ class SplashScreenState extends State<SplashScreen> {
             ArticlesScreen(
               client: client,
               f1nResponse: response,
+              onRefresh: _refresh,
             ),
             ScheduleScreen(
               response: response,
@@ -118,5 +119,11 @@ class SplashScreenState extends State<SplashScreen> {
       icon: Icon(iconData),
       label: Text(title),
     );
+  }
+
+  void _refresh() {
+    setState(() {
+      f1nResponse = client.getHomePage();
+    });
   }
 }
