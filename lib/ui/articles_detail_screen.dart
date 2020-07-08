@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:f1n/model/article_detail.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:f1n/f1n_client.dart';
+import 'package:f1n/service/f1n_provider.dart';
 
 class ArticleDetailScreen extends StatefulWidget {
   final String url;
-  final F1nClient client;
+  final F1nProvider client;
   final String imageUrl;
 
   const ArticleDetailScreen({
@@ -47,34 +49,41 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
   }
 
   Widget _buildBody(bool loading, ArticleDetail articleDetail) {
-    final List<Widget> widgets = [];
+    Widget body;
     if (loading) {
-      widgets.addAll([
-        _buildImage(widget.imageUrl),
-        SizedBox(height: 26),
-        Center(
-          child: Container(
-            width: 48,
-            height: 48,
-            child: CircularProgressIndicator(),
+      body = Column(
+        children: <Widget>[
+          _buildImage(widget.imageUrl),
+          SizedBox(height: 26),
+          Expanded(
+            child: Center(
+              child: Container(
+                width: 48,
+                height: 48,
+                child: CircularProgressIndicator(),
+              ),
+            ),
           ),
-        ),
-      ]);
+        ],
+      );
     } else {
-      widgets.addAll([
-        _buildImage(articleDetail.imageUrl),
-        _buildTitle(articleDetail.title),
-        ..._buildText(articleDetail),
-      ]);
+      body = SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            _buildImage(articleDetail.imageUrl),
+            _buildTitle(articleDetail.title),
+            SafeArea(
+              top: false,
+              child: Column(
+                children: _buildText(articleDetail),
+              ),
+            ),
+          ],
+        ),
+      );
     }
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[...widgets],
-          ),
-        ),
-      ),
+      body: body,
     );
   }
 

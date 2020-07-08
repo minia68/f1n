@@ -1,13 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:f1n/model/article.dart';
+import 'package:f1n/model/f1n_home.dart';
 import 'package:flutter/material.dart';
 import 'package:sa_stateless_animation/sa_stateless_animation.dart';
-import 'package:f1n/articles_detail_screen.dart';
-import 'package:f1n/f1n_client.dart';
+import 'package:f1n/ui/articles_detail_screen.dart';
+import 'package:f1n/service/f1n_provider.dart';
 import 'package:animations/animations.dart';
 
 class ArticlesScreen extends StatefulWidget {
-  final F1nResponse f1nResponse;
-  final F1nClient client;
+  final F1nHome f1nResponse;
+  final F1nProvider client;
 
   const ArticlesScreen({
     Key key,
@@ -30,7 +32,7 @@ class ArticlesScreenState extends State<ArticlesScreen>
     return _buildBody(widget.f1nResponse);
   }
 
-  Widget _buildBody(F1nResponse f1nResponse) {
+  Widget _buildBody(F1nHome f1nResponse) {
     final size = MediaQuery.of(context).size;
     return CustomScrollView(
       slivers: <Widget>[
@@ -205,7 +207,7 @@ class ArticlesScreenState extends State<ArticlesScreen>
       contentPadding: const EdgeInsets.all(8),
       leading: image,
       title: Text(article.title),
-      trailing: Text(article.content),
+      trailing: Text(article.date),
     );
   }
 

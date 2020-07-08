@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:f1n/model/f1n_home.dart';
 import 'package:flutter/material.dart';
-import 'package:f1n/articles_screen.dart';
-import 'package:f1n/f1n_client.dart';
-import 'package:f1n/schedule_screen.dart';
+import 'package:f1n/ui/articles_screen.dart';
+import 'package:f1n/service/f1n_provider.dart';
+import 'package:f1n/ui/schedule_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -10,21 +11,27 @@ class SplashScreen extends StatefulWidget {
 }
 
 class SplashScreenState extends State<SplashScreen> {
-  final client = F1nClient(Dio());
-  Future<F1nResponse> f1nResponse;
+  final client = F1nProvider(Dio());
+  Future<F1nHome> f1nResponse;
   int screenIdx = 0;
   PageController pageController;
 
   @override
   void initState() {
     super.initState();
-    f1nResponse = client.getMainPage();
+    f1nResponse = client.getHomePage();
     pageController = PageController();
   }
 
   @override
+  void dispose() {
+    pageController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<F1nResponse>(
+    return FutureBuilder<F1nHome>(
       future: f1nResponse,
       builder: (_, snapshot) {
         if (snapshot.hasError) {
@@ -37,7 +44,7 @@ class SplashScreenState extends State<SplashScreen> {
                 height: 16.0,
               ),
               RaisedButton(
-                onPressed: () => f1nResponse = client.getMainPage(),
+                onPressed: () => f1nResponse = client.getHomePage(),
                 child: Text('Refresh'),
               ),
             ],
@@ -58,7 +65,7 @@ class SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  Widget _buildBody(F1nResponse response) {
+  Widget _buildBody(F1nHome response) {
     return Scaffold(
       body: SafeArea(
         child: PageView(

@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:f1n/model/f1n_home.dart';
 import 'package:flutter/material.dart';
 import 'package:sa_stateless_animation/sa_stateless_animation.dart';
-import 'package:f1n/f1n_client.dart';
 
 class ScheduleScreen extends StatefulWidget {
-  final F1nResponse response;
+  final F1nHome response;
 
   const ScheduleScreen({
     Key key,
@@ -32,7 +32,7 @@ class ScheduleScreenState extends State<ScheduleScreen>
             end: 0,
           ),
           curve: Curves.easeIn,
-          duration: Duration(milliseconds: 400),
+          duration: Duration(milliseconds: 200),
           builder: (_, child, value) => Transform.translate(
             offset: Offset(value, 0),
             child: child,
@@ -56,7 +56,7 @@ class ScheduleScreenState extends State<ScheduleScreen>
             end: 0,
           ),
           curve: Curves.easeIn,
-          duration: Duration(milliseconds: 400),
+          duration: Duration(milliseconds: 200),
           builder: (_, child, value) => Transform.translate(
             offset: Offset(0, value),
             child: child,
