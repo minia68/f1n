@@ -23,14 +23,12 @@ class ArticlesScreen extends StatefulWidget {
   State<StatefulWidget> createState() => ArticlesScreenState();
 }
 
-class ArticlesScreenState extends State<ArticlesScreen>
-    with AutomaticKeepAliveClientMixin<ArticlesScreen> {
+class ArticlesScreenState extends State<ArticlesScreen> {
   int _index = 0;
   final _transitionType = ContainerTransitionType.fade;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return _buildBody(widget.f1nResponse);
   }
 
@@ -239,9 +237,6 @@ class ArticlesScreenState extends State<ArticlesScreen>
       closedBuilder: (_, __) => closeScreen,
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class _SliverWidgetDelegate extends SliverPersistentHeaderDelegate {
