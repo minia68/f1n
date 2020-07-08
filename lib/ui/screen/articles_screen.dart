@@ -1,38 +1,27 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f1n/model/article.dart';
-import 'package:f1n/model/f1n_home.dart';
+import 'package:f1n/ui/widget/animated_pageview.dart';
+import 'package:f1n/ui/widget/sliver_fixed_height_persistent_header_delegate.dart';
+import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
 import 'package:sa_stateless_animation/sa_stateless_animation.dart';
-import 'package:f1n/ui/articles_detail_screen.dart';
+import 'package:f1n/ui/screen/articles_detail_screen.dart';
 import 'package:f1n/service/f1n_provider.dart';
 import 'package:animations/animations.dart';
 
-class ArticlesScreen extends StatefulWidget {
-  final F1nHome f1nResponse;
+class ArticlesScreen extends StatelessWidget {
   final F1nProvider client;
-  final VoidCallback onRefresh;
+  final MainStore store;
 
   const ArticlesScreen({
     Key key,
-    @required this.f1nResponse,
+    @required this.store,
     @required this.client,
-    @required this.onRefresh,
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => ArticlesScreenState();
-}
-
-class ArticlesScreenState extends State<ArticlesScreen> {
-  int _index = 0;
-  final _transitionType = ContainerTransitionType.fade;
-
-  @override
   Widget build(BuildContext context) {
-    return _buildBody(widget.f1nResponse);
-  }
-
-  Widget _buildBody(F1nHome f1nResponse) {
+    print('build ArticlesScreenState');
     final size = MediaQuery.of(context).size;
     return CustomScrollView(
       slivers: <Widget>[
@@ -42,54 +31,34 @@ class ArticlesScreenState extends State<ArticlesScreen> {
               horizontal: 16.0,
               vertical: 8.0,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  'Главное',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.refresh),
-                  onPressed: widget.onRefresh,
-                ),
-              ],
-            ),
+            child: _buildMainTitle(),
           ),
         ),
         SliverToBoxAdapter(
           child: SizedBox(
             height: size.height * 0.3,
-            child: PlayAnimation<double>(
-              tween: Tween(
-                begin: size.width,
-                end: 0,
-              ),
-              curve: Curves.easeIn,
-              duration: Duration(milliseconds: 400),
-              builder: (_, child, value) => Transform.translate(
-                offset: Offset(value, 0),
-                child: child,
-              ),
-              child: _buildMain(f1nResponse.main),
+            child: AnimatedPageView(
+              itemCount: store.f1nFuture.value.main.length,
+              itemBuilder: (i) =>
+                  _buildMainContainer(store.f1nFuture.value.main[i]),
             ),
           ),
         ),
         SliverPersistentHeader(
           pinned: true,
-          delegate: _SliverWidgetDelegate(Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Последние',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+          delegate: SliverFixedHeightPersistentHeaderDelegate(
+            height: 56.0,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Последние',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          )),
+          ),
         ),
         SliverToBoxAdapter(
           // TODO possible change to translate
@@ -103,31 +72,39 @@ class ArticlesScreenState extends State<ArticlesScreen> {
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: _buildToday(f1nResponse.latest),
+          sliver: _buildToday(),
         ),
       ],
     );
   }
 
-  Widget _buildMain(List<Article> articles) {
-    return PageView.builder(
-      controller: PageController(
-        viewportFraction: 0.85,
-      ),
-      itemCount: articles.length,
-      itemBuilder: (_, i) => AnimatedPadding(
-        duration: Duration(milliseconds: 400),
-        padding: EdgeInsets.all(_index == i ? 0 : 12.0),
-        child: _buildOpenContainer(
-          ArticleDetailScreen(
-            url: articles[i].detailUrl,
-            client: widget.client,
-            imageUrl: articles[i].imageUrl,
+  Widget _buildMainTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(
+          'Главное',
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
           ),
-          _buildMainItem(articles[i]),
         ),
+        IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: store.fetch,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMainContainer(Article article) {
+    return _buildOpenContainer(
+      ArticleDetailScreen(
+        url: article.detailUrl,
+        client: client,
+        imageUrl: article.imageUrl,
       ),
-      onPageChanged: (int index) => setState(() => _index = index),
+      _buildMainItem(article),
     );
   }
 
@@ -181,18 +158,21 @@ class ArticlesScreenState extends State<ArticlesScreen> {
     );
   }
 
-  Widget _buildToday(List<Article> articles) {
+  Widget _buildToday() {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (_, i) => _buildOpenContainer(
-          ArticleDetailScreen(
-            url: articles[i].detailUrl,
-            client: widget.client,
-            imageUrl: articles[i].imageUrl,
-          ),
-          _buildTodayItem(articles[i]),
-        ),
-        childCount: articles.length,
+        (_, i) {
+          final article = store.f1nFuture.value.latest[i];
+          return _buildOpenContainer(
+            ArticleDetailScreen(
+              url: article.detailUrl,
+              client: client,
+              imageUrl: article.imageUrl,
+            ),
+            _buildTodayItem(article),
+          );
+        },
+        childCount: store.f1nFuture.value.latest.length,
       ),
     );
   }
@@ -226,7 +206,7 @@ class ArticlesScreenState extends State<ArticlesScreen> {
 
   Widget _buildOpenContainer(Widget openScreen, Widget closeScreen) {
     return OpenContainer(
-      transitionType: _transitionType,
+      transitionType: ContainerTransitionType.fade,
       openBuilder: (_, __) => openScreen,
       tappable: true,
       closedShape: const RoundedRectangleBorder(),
@@ -239,28 +219,4 @@ class ArticlesScreenState extends State<ArticlesScreen> {
   }
 }
 
-class _SliverWidgetDelegate extends SliverPersistentHeaderDelegate {
-  _SliverWidgetDelegate(this._widget);
 
-  final Widget _widget;
-  final _extent = 56.0;
-
-  @override
-  double get minExtent => _extent;
-  @override
-  double get maxExtent => _extent;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      child: _widget,
-      color: Theme.of(context).scaffoldBackgroundColor,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverWidgetDelegate oldDelegate) {
-    return false;
-  }
-}

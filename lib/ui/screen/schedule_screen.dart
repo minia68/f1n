@@ -1,26 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:f1n/model/f1n_home.dart';
-import 'package:f1n/ui/schedule_timer.dart';
+import 'package:f1n/model/schedule.dart';
+import 'package:f1n/ui/widget/schedule_timer.dart';
 import 'package:flutter/material.dart';
 
-class ScheduleScreen extends StatefulWidget {
-  final F1nHome response;
+class ScheduleScreen extends StatelessWidget {
+  final Schedule schedule;
 
   const ScheduleScreen({
     Key key,
-    @required this.response,
+    @required this.schedule,
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => ScheduleScreenState();
-}
-
-class ScheduleScreenState extends State<ScheduleScreen>
-  with AutomaticKeepAliveClientMixin<ScheduleScreen> {
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Column(
       children: <Widget>[
         _buildImage(context),
@@ -31,12 +23,15 @@ class ScheduleScreenState extends State<ScheduleScreen>
             horizontal: 16,
           ),
           child: ScheduleTimerWidget(
-            dateTime: widget.response.schedule.date,
+            dateTime: schedule.date,
           ),
         ),
         SizedBox(height: 16),
-        Column(
-          children: _buildSchedule(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Column(
+            children: _buildSchedule(),
+          ),
         ),
       ],
     );
@@ -46,7 +41,7 @@ class ScheduleScreenState extends State<ScheduleScreen>
     return Stack(
       children: <Widget>[
         CachedNetworkImage(
-          imageUrl: widget.response.schedule.imageUrl,
+          imageUrl: schedule.imageUrl,
           width: MediaQuery.of(context).size.width,
           fit: BoxFit.cover,
         ),
@@ -76,11 +71,11 @@ class ScheduleScreenState extends State<ScheduleScreen>
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Text(
-                  widget.response.schedule.title.toUpperCase(),
+                  schedule.title.toUpperCase(),
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  widget.response.schedule.titleDate,
+                  schedule.titleDate,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -93,7 +88,7 @@ class ScheduleScreenState extends State<ScheduleScreen>
 
   List<Widget> _buildSchedule() {
     final List<Widget> result = [];
-    for (final event in widget.response.schedule.events) {
+    for (final event in schedule.events) {
       result.add(Text(
         event.title,
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -113,9 +108,6 @@ class ScheduleScreenState extends State<ScheduleScreen>
     }
     return result;
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 

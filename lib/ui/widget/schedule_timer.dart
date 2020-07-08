@@ -33,7 +33,7 @@ class ScheduleTimerWidgetState extends State<ScheduleTimerWidget> {
 
   @override
   void dispose() {
-    timer.cancel();
+    timer?.cancel();
     super.dispose();
   }
 

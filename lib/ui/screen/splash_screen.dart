@@ -1,9 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:f1n/model/f1n_home.dart';
+import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
-import 'package:f1n/ui/articles_screen.dart';
+import 'package:f1n/ui/screen/articles_screen.dart';
 import 'package:f1n/service/f1n_provider.dart';
-import 'package:f1n/ui/schedule_screen.dart';
+import 'package:f1n/ui/screen/schedule_screen.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -12,26 +15,38 @@ class SplashScreen extends StatefulWidget {
 
 class SplashScreenState extends State<SplashScreen> {
   final client = F1nProvider(Dio());
-  Future<F1nHome> f1nResponse;
-  int screenIdx = 0;
+  MainStore _store;
 
   @override
   void initState() {
     super.initState();
-    f1nResponse = client.getHomePage();
+    _store = MainStore(client);
+    _store.fetch();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<F1nHome>(
-      future: f1nResponse,
-      builder: (_, snapshot) {
-        if (snapshot.hasError) {
+    print('build');
+    return Observer(
+      builder: (_) {
+        print('Observer');
+        if (_store.f1nFuture == null ||
+            _store.f1nFuture.status == FutureStatus.pending) {
+          return Center(
+            child: Container(
+              width: 48,
+              height: 48,
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (_store.f1nFuture.status == FutureStatus.rejected) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text(snapshot.error.toString()),
+              Text(_store.f1nFuture.error.toString()), //TODO normal message
               SizedBox(
                 height: 16.0,
               ),
@@ -42,36 +57,29 @@ class SplashScreenState extends State<SplashScreen> {
             ],
           );
         }
-        if (!snapshot.hasData ||
-            snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: Container(
-              width: 48,
-              height: 48,
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        return _buildBody(snapshot.data);
+
+        return _buildBody(_store.f1nFuture.value);
       },
     );
   }
 
   Widget _buildBody(F1nHome response) {
+    print('_buildBody');
     return Scaffold(
       body: SafeArea(
-        child: IndexedStack(
-          index: screenIdx,
-          children: <Widget>[
-            ArticlesScreen(
-              client: client,
-              f1nResponse: response,
-              onRefresh: _refresh,
-            ),
-            ScheduleScreen(
-              response: response,
-            ),
-          ],
+        child: Observer(
+          builder: (_) => IndexedStack(
+            index: _store.screenIndex,
+            children: <Widget>[
+              ArticlesScreen(
+                client: client,
+                store: _store,
+              ),
+              ScheduleScreen(
+                schedule: response.schedule,
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: Card(
@@ -97,23 +105,23 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Widget _buildIconButton(int idx, String title, IconData iconData) {
-    return FlatButton.icon(
-      textColor: screenIdx == idx ? Theme.of(context).accentColor : null,
-      onPressed: () {
-        if (screenIdx != idx) {
-          setState(() {
-            screenIdx = idx;
-          });
-        }
-      },
-      icon: Icon(iconData),
-      label: Text(title),
+    print('_buildIconButton');
+    return Observer(
+      builder: (_) => FlatButton.icon(
+        textColor:
+            _store.screenIndex == idx ? Theme.of(context).accentColor : null,
+        onPressed: () {
+          if (_store.screenIndex != idx) {
+            _store.screenIndex = idx;
+          }
+        },
+        icon: Icon(iconData),
+        label: Text(title),
+      ),
     );
   }
 
   void _refresh() {
-    setState(() {
-      f1nResponse = client.getHomePage();
-    });
+    _store.fetch();
   }
 }
