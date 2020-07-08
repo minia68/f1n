@@ -14,19 +14,11 @@ class SplashScreenState extends State<SplashScreen> {
   final client = F1nProvider(Dio());
   Future<F1nHome> f1nResponse;
   int screenIdx = 0;
-  PageController pageController;
 
   @override
   void initState() {
     super.initState();
     f1nResponse = client.getHomePage();
-    pageController = PageController();
-  }
-
-  @override
-  void dispose() {
-    pageController?.dispose();
-    super.dispose();
   }
 
   @override
@@ -68,7 +60,8 @@ class SplashScreenState extends State<SplashScreen> {
   Widget _buildBody(F1nHome response) {
     return Scaffold(
       body: SafeArea(
-        child: PageView(
+        child: IndexedStack(
+          index: screenIdx,
           children: <Widget>[
             ArticlesScreen(
               client: client,
@@ -79,8 +72,6 @@ class SplashScreenState extends State<SplashScreen> {
               response: response,
             ),
           ],
-          physics: NeverScrollableScrollPhysics(),
-          controller: pageController,
         ),
       ),
       bottomNavigationBar: Card(
@@ -112,7 +103,6 @@ class SplashScreenState extends State<SplashScreen> {
         if (screenIdx != idx) {
           setState(() {
             screenIdx = idx;
-            pageController.jumpToPage(idx);
           });
         }
       },
