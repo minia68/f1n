@@ -32,58 +32,63 @@ class ArticlesScreenState extends State<ArticlesScreen>
 
   Widget _buildBody(F1nResponse f1nResponse) {
     final size = MediaQuery.of(context).size;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Главное',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Главное',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
-        Expanded(
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: size.height * 0.3,
+            child: PlayAnimation<double>(
+              tween: Tween(
+                begin: size.width,
+                end: 0,
+              ),
+              curve: Curves.easeIn,
+              duration: Duration(milliseconds: 400),
+              builder: (_, child, value) => Transform.translate(
+                offset: Offset(value, 0),
+                child: child,
+              ),
+              child: _buildMain(f1nResponse.main),
+            ),
+          ),
+        ),
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _SliverWidgetDelegate(Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Последние',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          )),
+        ),
+        SliverToBoxAdapter( // TODO possible change to translate
           child: PlayAnimation<double>(
-            tween: Tween(
-              begin: size.width,
-              end: 0,
-            ),
-            curve: Curves.easeIn,
-            duration: Duration(milliseconds: 400),
-            builder: (_, child, value) => Transform.translate(
-              offset: Offset(value, 0),
-              child: child,
-            ),
-            child: _buildMain(f1nResponse.main),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Последние',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+            duration: Duration(milliseconds: 200),
+            tween: Tween(begin: 0.6, end: 0.0),
+            builder: (_, __, value) => Container(
+              height: size.height * value,
             ),
           ),
         ),
-        Expanded(
-          child: PlayAnimation<double>(
-            tween: Tween(
-              begin: size.height / 2,
-              end: 0,
-            ),
-            curve: Curves.easeIn,
-            duration: Duration(milliseconds: 400),
-            builder: (_, child, value) => Transform.translate(
-              offset: Offset(0, value),
-              child: child,
-            ),
-            child: _buildToday(f1nResponse.latest),
-          ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: _buildToday(f1nResponse.latest),
         ),
       ],
     );
@@ -162,38 +167,40 @@ class ArticlesScreenState extends State<ArticlesScreen>
   }
 
   Widget _buildToday(List<Article> articles) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: articles.length,
-      itemBuilder: (_, i) => _buildOpenContainer(
-        ArticleDetailScreen(
-          url: articles[i].detailUrl,
-          client: widget.client,
-          imageUrl: articles[i].imageUrl,
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (_, i) => _buildOpenContainer(
+          ArticleDetailScreen(
+            url: articles[i].detailUrl,
+            client: widget.client,
+            imageUrl: articles[i].imageUrl,
+          ),
+          _buildTodayItem(articles[i]),
         ),
-        _buildTodayItem(articles[i]),
+        childCount: articles.length,
       ),
     );
   }
 
   Widget _buildTodayItem(Article article) {
-    final image = article.imageUrl != null
-        ? Card(
-            margin: const EdgeInsets.all(0),
-            elevation: 6,
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: AspectRatio(
-              aspectRatio: 1.3,
-              child: CachedNetworkImage(
-                imageUrl: article.imageUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
-          )
-        : null;
+    Widget image;
+    if (article.imageUrl != null) {
+      image = Card(
+        margin: const EdgeInsets.all(0),
+        elevation: 6,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: AspectRatio(
+          aspectRatio: 1.3,
+          child: CachedNetworkImage(
+            imageUrl: article.imageUrl,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
     return ListTile(
       contentPadding: const EdgeInsets.all(8),
       leading: image,
@@ -218,4 +225,30 @@ class ArticlesScreenState extends State<ArticlesScreen>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class _SliverWidgetDelegate extends SliverPersistentHeaderDelegate {
+  _SliverWidgetDelegate(this._widget);
+
+  final Widget _widget;
+  final _extent = 56.0;
+
+  @override
+  double get minExtent => _extent;
+  @override
+  double get maxExtent => _extent;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      child: _widget,
+      color: Theme.of(context).scaffoldBackgroundColor,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverWidgetDelegate oldDelegate) {
+    return false;
+  }
 }
