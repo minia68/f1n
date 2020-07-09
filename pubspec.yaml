@@ -20,6 +20,7 @@ dependencies:
   animations: ^1.1.1
   sa_stateless_animation: ^1.0.1
   cached_network_image: ^2.2.0+1
+  flutter_html: ^1.0.0
 
   cupertino_icons: ^0.1.3
 

@@ -67,10 +67,9 @@ class F1nProvider {
 
       return ArticleDetail(
         title: doc.querySelector('.post_title').text,
-        date: doc.querySelector('.post_info .post_date').text,
+        date: doc.querySelector('.post_info .post_date')?.text ?? '',
         imageUrl: doc.querySelector('.post_thumbnail img').attributes['src'],
-        text:
-            doc.querySelectorAll('.post_content p').map((e) => e.text).toList(),
+        text: doc.querySelector('.post_content').innerHtml.trim(),
       );
     } catch (e, s) {
       print(e);
@@ -135,7 +134,8 @@ class F1nProvider {
         imageUrl:
             item.findElements('enclosure').single.getAttribute('url').trim(),
         detailUrl: item.findElements('link').single.text.trim(),
-        date: pubDate.substring(startIdx, startIdx + 5), //TODO implement today time others dd.MM
+        date: pubDate.substring(
+            startIdx, startIdx + 5), //TODO implement today time others dd.MM
       ));
     }
     return result;

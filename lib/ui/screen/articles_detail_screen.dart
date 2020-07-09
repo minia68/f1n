@@ -5,6 +5,8 @@ import 'package:f1n/model/article_detail.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/style.dart';
 import 'package:get/get.dart';
 
 class ArticleDetailScreen extends StatefulWidget {
@@ -27,9 +29,7 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
   @override
   void initState() {
     super.initState();
-    articleDetail = Get.find<MainStore>()
-        .f1nProvider
-        .getArticle(widget.url);
+    articleDetail = Get.find<MainStore>().f1nProvider.getArticle(widget.url);
   }
 
   @override
@@ -81,10 +81,29 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
           children: <Widget>[
             _buildImage(articleDetail.imageUrl),
             _buildTitle(articleDetail.title),
+            Text(articleDetail.date),
+            SizedBox(
+              height: 8.0,
+            ),
             SafeArea(
               top: false,
-              child: Column(
-                children: _buildText(articleDetail),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Html(
+                  customRender: {
+                    'a': (ctx, widget, style, elem) {
+                      return Text(elem.text, style: TextStyle(fontSize: 16.0));
+                    },
+                    'table': (ctx, widget, style, elem) => null,
+                  },
+                  data: articleDetail.text,
+                  style: {
+                    'p': Style(
+                      fontSize: FontSize(16.0),
+                      textAlign: TextAlign.start,
+                    ),
+                  },
+                ),
               ),
             ),
           ],
@@ -120,31 +139,12 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
 
   Widget _buildTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: Text(
         title,
         style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
       ),
     );
-  }
-
-  List<Widget> _buildText(ArticleDetail articleDetail) {
-    return [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(articleDetail.date),
-      ),
-      SizedBox(
-        height: 8.0,
-      ),
-      for (final text in articleDetail.text)
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            text,
-            style: TextStyle(fontSize: 16),
-          ),
-        )
-    ];
   }
 }
