@@ -16,14 +16,14 @@ class F1nProvider {
   @visibleForOverriding
   static final rssUrl = 'https://www.f1news.ru/export/news.xml';
 
-  final Dio dio;
+  final Dio _dio;
   final Clock _clock;
 
-  F1nProvider(this.dio, {Clock clock = const Clock()}) : _clock = clock;
+  F1nProvider(this._dio, {Clock clock = const Clock()}) : _clock = clock;
 
   Future<F1nHome> getHomePage() async {
     try {
-      final response = await dio.get<String>(
+      final response = await _dio.get<String>(
         homeUrl,
         options: RequestOptions(
           responseType: ResponseType.plain,
@@ -36,7 +36,7 @@ class F1nProvider {
       main.add(_parseMainArticle(doc));
       _parseMainArticles(doc, main);
 
-      final rssResponse = await dio.get<String>(
+      final rssResponse = await _dio.get<String>(
         rssUrl,
         options: RequestOptions(
           responseType: ResponseType.plain,
@@ -58,7 +58,7 @@ class F1nProvider {
 
   Future<ArticleDetail> getArticle(String url) async {
     try {
-      final response = await dio.get<String>(
+      final response = await _dio.get<String>(
         url,
         options: RequestOptions(
           responseType: ResponseType.plain,
@@ -121,21 +121,10 @@ class F1nProvider {
         imageUrl:
             item.findElements('enclosure').single.getAttribute('url').trim(),
         detailUrl: item.findElements('link').single.text.trim(),
-        date: getArticleDate(pubDate, dateFormat),
+        date: _getArticleDate(pubDate, dateFormat),
       ));
     }
     return result;
-  }
-  
-  String getArticleDate(String date, DateFormat dateFormat) {
-    final dateTime = dateFormat.parse(date.substring(0, date.length - 6));
-    final now = _clock.now();
-    if (dateTime.year == now.year && dateTime.month == now.month &&
-        dateTime.day == now.day) {
-      return '${_toDoubleDigit(dateTime.hour)}:${_toDoubleDigit(dateTime.minute)}';
-    } else {
-      return '${_toDoubleDigit(dateTime.day)}/${_toDoubleDigit(dateTime.month)}';
-    }
   }
 
   Schedule _getSchedule(Document doc) {
@@ -200,6 +189,17 @@ class F1nProvider {
     final key = '/userfiles/';
     final idx = imageUrl.indexOf(key);
     return '//cdn.f1ne.ws${imageUrl.substring(idx, imageUrl.length)}';
+  }
+
+  String _getArticleDate(String date, DateFormat dateFormat) {
+    final dateTime = dateFormat.parse(date.substring(0, date.length - 6));
+    final now = _clock.now();
+    if (dateTime.year == now.year && dateTime.month == now.month &&
+        dateTime.day == now.day) {
+      return '${_toDoubleDigit(dateTime.hour)}:${_toDoubleDigit(dateTime.minute)}';
+    } else {
+      return '${_toDoubleDigit(dateTime.day)}/${_toDoubleDigit(dateTime.month)}';
+    }
   }
 
   String _toDoubleDigit(int number) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 class ScheduleTimerWidget extends StatefulWidget {
@@ -63,8 +64,9 @@ class ScheduleTimerWidgetState extends State<ScheduleTimerWidget> {
     int hours = 0;
     int minutes = 0;
     int seconds = 0;
-    if (date.millisecondsSinceEpoch > DateTime.now().millisecondsSinceEpoch) {
-      final diff = date.difference(DateTime.now());
+    final now = clock.now();
+    if (date.millisecondsSinceEpoch > now.millisecondsSinceEpoch) {
+      final diff = date.difference(now);
       days = diff.inDays;
       hours = diff.inHours - days * 24;
       minutes = diff.inMinutes - (days * 24 * 60 + hours * 60);
