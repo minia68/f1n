@@ -17,9 +17,8 @@ class F1nProvider {
   static final rssUrl = 'https://www.f1news.ru/export/news.xml';
 
   final Dio _dio;
-  final Clock _clock;
 
-  F1nProvider(this._dio, {Clock clock = const Clock()}) : _clock = clock;
+  F1nProvider(this._dio);
 
   Future<F1nHome> getHomePage() async {
     try {
@@ -193,7 +192,7 @@ class F1nProvider {
 
   String _getArticleDate(String date, DateFormat dateFormat) {
     final dateTime = dateFormat.parse(date.substring(0, date.length - 6));
-    final now = _clock.now();
+    final now = clock.now();
     if (dateTime.year == now.year && dateTime.month == now.month &&
         dateTime.day == now.day) {
       return '${_toDoubleDigit(dateTime.hour)}:${_toDoubleDigit(dateTime.minute)}';

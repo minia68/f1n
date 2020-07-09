@@ -19,7 +19,8 @@ void main() {
       onReceiveProgress: anyNamed('onReceiveProgress'),
     )).thenAnswer((_) async => Response(
           statusCode: 200,
-          data: File('test/assets/f1n_home.html').readAsStringSync(),
+          data: (await getProjectFile('test/assets/f1n_home.html'))
+              .readAsStringSync(),
         ));
     when(dio.get<String>(
       F1nProvider.rssUrl,
@@ -29,12 +30,13 @@ void main() {
       onReceiveProgress: anyNamed('onReceiveProgress'),
     )).thenAnswer((_) async => Response(
           statusCode: 200,
-          data: File('test/assets/f1n_news.xml').readAsStringSync(),
+          data: (await getProjectFile('test/assets/f1n_news.xml'))
+              .readAsStringSync(),
         ));
 
-    final f1nHome =
-        await F1nProvider(dio, clock: Clock.fixed(DateTime(2020, 08, 09, 13)))
-            .getHomePage();
+    final f1nProvider =
+        withClock(Clock.fixed(DateTime(2020, 7, 9)), () => F1nProvider(dio));
+    final f1nHome = await f1nProvider.getHomePage();
     expect(f1nHome.main.length, 7);
     Article article = f1nHome.main[0];
     expect(article.title, 'В Renault объявили о возвращении Фернандо Алонсо');
@@ -140,7 +142,8 @@ void main() {
       onReceiveProgress: anyNamed('onReceiveProgress'),
     )).thenAnswer((_) async => Response(
           statusCode: 200,
-          data: File('test/assets/f1n_article_detail.html').readAsStringSync(),
+          data: (await getProjectFile('test/assets/f1n_article_detail.html'))
+              .readAsStringSync(),
         ));
 
     final articleDetail = await F1nProvider(dio).getArticle(url);
@@ -161,3 +164,13 @@ void main() {
 }
 
 class MockDio extends Mock implements Dio {}
+
+//https://stackoverflow.com/questions/58592859/reading-a-resource-from-a-file-in-a-flutter-test
+Future<File> getProjectFile(String path) async {
+  var dir = Directory.current;
+  while (
+      !await dir.list().any((entity) => entity.path.endsWith('pubspec.yaml'))) {
+    dir = dir.parent;
+  }
+  return File('${dir.path}/$path');
+}
