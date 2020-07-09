@@ -4,23 +4,21 @@ import 'package:f1n/ui/widget/animated_pageview.dart';
 import 'package:f1n/ui/widget/sliver_fixed_height_persistent_header_delegate.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sa_stateless_animation/sa_stateless_animation.dart';
 import 'package:f1n/ui/screen/articles_detail_screen.dart';
-import 'package:f1n/service/f1n_provider.dart';
 import 'package:animations/animations.dart';
 
 class ArticlesScreen extends StatelessWidget {
-  final F1nProvider client;
-  final MainStore store;
 
   const ArticlesScreen({
     Key key,
-    @required this.store,
-    @required this.client,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final store = Provider.of<MainStore>(context, listen: false);
+
     print('build ArticlesScreenState');
     final size = MediaQuery.of(context).size;
     return CustomScrollView(
@@ -31,7 +29,7 @@ class ArticlesScreen extends StatelessWidget {
               horizontal: 16.0,
               vertical: 8.0,
             ),
-            child: _buildMainTitle(),
+            child: _buildMainTitle(store),
           ),
         ),
         SliverToBoxAdapter(
@@ -72,13 +70,13 @@ class ArticlesScreen extends StatelessWidget {
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: _buildToday(),
+          sliver: _buildToday(store),
         ),
       ],
     );
   }
 
-  Widget _buildMainTitle() {
+  Widget _buildMainTitle(MainStore store) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -101,7 +99,6 @@ class ArticlesScreen extends StatelessWidget {
     return _buildOpenContainer(
       ArticleDetailScreen(
         url: article.detailUrl,
-        client: client,
         imageUrl: article.imageUrl,
       ),
       _buildMainItem(article),
@@ -158,7 +155,7 @@ class ArticlesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToday() {
+  Widget _buildToday(MainStore store) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (_, i) {
@@ -166,7 +163,6 @@ class ArticlesScreen extends StatelessWidget {
           return _buildOpenContainer(
             ArticleDetailScreen(
               url: article.detailUrl,
-              client: client,
               imageUrl: article.imageUrl,
             ),
             _buildTodayItem(article),

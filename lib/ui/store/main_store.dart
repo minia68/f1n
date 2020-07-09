@@ -7,9 +7,9 @@ part 'main_store.g.dart';
 class MainStore = _MainStore with _$MainStore;
 
 abstract class _MainStore with Store {
-  final F1nProvider _f1nProvider;
+  final F1nProvider f1nProvider;
 
-  _MainStore(this._f1nProvider);
+  _MainStore(this.f1nProvider);
 
   @observable
   ObservableFuture<F1nHome> f1nFuture;
@@ -19,6 +19,6 @@ abstract class _MainStore with Store {
 
   @action
   void fetch() {
-    f1nFuture = ObservableFuture(_f1nProvider.getHomePage());
+    f1nFuture = ObservableFuture(f1nProvider.getHomePage());
   }
 }

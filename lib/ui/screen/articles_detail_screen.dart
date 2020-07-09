@@ -1,18 +1,19 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f1n/model/article_detail.dart';
+import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:f1n/service/f1n_provider.dart';
+import 'package:provider/provider.dart';
 
 class ArticleDetailScreen extends StatefulWidget {
   final String url;
-  final F1nProvider client;
   final String imageUrl;
 
   const ArticleDetailScreen({
     Key key,
     @required this.url,
-    @required this.client,
     @required this.imageUrl,
   }) : super(key: key);
 
@@ -26,7 +27,9 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
   @override
   void initState() {
     super.initState();
-    articleDetail = widget.client.getArticle(widget.url);
+    articleDetail = Provider.of<MainStore>(context, listen: false)
+        .f1nProvider
+        .getArticle(widget.url);
   }
 
   @override
@@ -34,15 +37,21 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
     return FutureBuilder<ArticleDetail>(
       future: articleDetail,
       builder: (_, snapshot) {
+        Widget body;
         if (snapshot.hasError) {
-          return Center(
+          body = Center(
             child: Text(snapshot.error.toString()),
           );
+        } else {
+          body = _buildBody(
+            !snapshot.hasData ||
+                snapshot.connectionState == ConnectionState.waiting,
+            snapshot.data,
+          );
         }
-        return _buildBody(
-          !snapshot.hasData ||
-              snapshot.connectionState == ConnectionState.waiting,
-          snapshot.data,
+        return Scaffold(
+          appBar: Platform.isIOS ? AppBar() : null,
+          body: body,
         );
       },
     );
@@ -82,9 +91,7 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
         ),
       );
     }
-    return Scaffold(
-      body: body,
-    );
+    return body;
   }
 
   Widget _buildImage(String url) {

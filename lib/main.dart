@@ -1,6 +1,10 @@
+import 'package:dio/dio.dart';
+import 'package:f1n/service/f1n_provider.dart';
+import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:f1n/ui/screen/splash_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -8,7 +12,12 @@ void main() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) async {
-    runApp(MyApp());
+    final mainStore = MainStore(F1nProvider(Dio()));
+    runApp(Provider<MainStore>.value(
+      value: mainStore,
+      updateShouldNotify: (_, __) => false,
+      child: MyApp(),
+    ));
   });
 }
 

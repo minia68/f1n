@@ -1,21 +1,23 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f1n/model/schedule.dart';
+import 'package:f1n/ui/store/main_store.dart';
 import 'package:f1n/ui/widget/schedule_timer.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ScheduleScreen extends StatelessWidget {
-  final Schedule schedule;
-
   const ScheduleScreen({
     Key key,
-    @required this.schedule,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    print('build ScheduleScreen');
+    final schedule =
+        Provider.of<MainStore>(context, listen: false).f1nFuture.value.schedule;
     return Column(
       children: <Widget>[
-        _buildImage(context),
+        _buildImage(context, schedule),
         Container(
           color: Colors.black,
           padding: const EdgeInsets.symmetric(
@@ -30,14 +32,14 @@ class ScheduleScreen extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Column(
-            children: _buildSchedule(),
+            children: _buildSchedule(schedule),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildImage(BuildContext context) {
+  Widget _buildImage(BuildContext context, Schedule schedule) {
     return Stack(
       children: <Widget>[
         CachedNetworkImage(
@@ -86,7 +88,7 @@ class ScheduleScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildSchedule() {
+  List<Widget> _buildSchedule(Schedule schedule) {
     final List<Widget> result = [];
     for (final event in schedule.events) {
       result.add(Text(
@@ -109,5 +111,3 @@ class ScheduleScreen extends StatelessWidget {
     return result;
   }
 }
-
-

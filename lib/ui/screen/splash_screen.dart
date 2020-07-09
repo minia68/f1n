@@ -1,12 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:f1n/model/f1n_home.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
 import 'package:f1n/ui/screen/articles_screen.dart';
-import 'package:f1n/service/f1n_provider.dart';
 import 'package:f1n/ui/screen/schedule_screen.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -14,13 +13,16 @@ class SplashScreen extends StatefulWidget {
 }
 
 class SplashScreenState extends State<SplashScreen> {
-  final client = F1nProvider(Dio());
   MainStore _store;
+  final _screens = [
+    ArticlesScreen(),
+    ScheduleScreen(),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _store = MainStore(client);
+    _store = Provider.of<MainStore>(context, listen: false);
     _store.fetch();
   }
 
@@ -70,15 +72,7 @@ class SplashScreenState extends State<SplashScreen> {
         child: Observer(
           builder: (_) => IndexedStack(
             index: _store.screenIndex,
-            children: <Widget>[
-              ArticlesScreen(
-                client: client,
-                store: _store,
-              ),
-              ScheduleScreen(
-                schedule: response.schedule,
-              ),
-            ],
+            children: _screens,
           ),
         ),
       ),
