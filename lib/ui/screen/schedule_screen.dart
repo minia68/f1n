@@ -3,7 +3,7 @@ import 'package:f1n/model/schedule.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:f1n/ui/widget/schedule_timer.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 class ScheduleScreen extends StatelessWidget {
   const ScheduleScreen({
@@ -13,8 +13,7 @@ class ScheduleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('build ScheduleScreen');
-    final schedule =
-        Provider.of<MainStore>(context, listen: false).f1nFuture.value.schedule;
+    final schedule = Get.find<MainStore>().f1nHome.schedule;
     return Column(
       children: <Widget>[
         _buildImage(context, schedule),

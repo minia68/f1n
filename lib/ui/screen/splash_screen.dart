@@ -1,39 +1,39 @@
-import 'package:f1n/model/f1n_home.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
 import 'package:f1n/ui/screen/articles_screen.dart';
 import 'package:f1n/ui/screen/schedule_screen.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:mobx/mobx.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
-class SplashScreen extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => SplashScreenState();
-}
-
-class SplashScreenState extends State<SplashScreen> {
-  MainStore _store;
+class SplashScreen extends StatelessWidget {
   final _screens = [
     ArticlesScreen(),
     ScheduleScreen(),
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _store = Provider.of<MainStore>(context, listen: false);
-    _store.fetch();
-  }
-
-  @override
   Widget build(BuildContext context) {
     print('build');
-    return Observer(
-      builder: (_) {
+    return GetX<MainStore>(
+      builder: (store) {
         print('Observer');
-        if (_store.f1nFuture == null ||
-            _store.f1nFuture.status == FutureStatus.pending) {
+        if (store.error != null) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text(store.error), //TODO normal message
+              SizedBox(
+                height: 16.0,
+              ),
+              RaisedButton(
+                onPressed: () => store.fetch(),
+                child: Text('Обновить'),
+              ),
+            ],
+          );
+        }
+
+        if (store.f1nHome == null || store.loading) {
           return Center(
             child: Container(
               width: 48,
@@ -43,35 +43,18 @@ class SplashScreenState extends State<SplashScreen> {
           );
         }
 
-        if (_store.f1nFuture.status == FutureStatus.rejected) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(_store.f1nFuture.error.toString()), //TODO normal message
-              SizedBox(
-                height: 16.0,
-              ),
-              RaisedButton(
-                onPressed: _refresh,
-                child: Text('Обновить'),
-              ),
-            ],
-          );
-        }
-
-        return _buildBody(_store.f1nFuture.value);
+        return _buildBody(context, store);
       },
     );
   }
 
-  Widget _buildBody(F1nHome response) {
+  Widget _buildBody(BuildContext context, MainStore store) {
     print('_buildBody');
     return Scaffold(
       body: SafeArea(
-        child: Observer(
-          builder: (_) => IndexedStack(
-            index: _store.screenIndex,
+        child: Obx(
+          () => IndexedStack(
+            index: store.screenIndex.value,
             children: _screens,
           ),
         ),
@@ -89,8 +72,8 @@ class SplashScreenState extends State<SplashScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              _buildIconButton(0, 'Новости', Icons.list),
-              _buildIconButton(1, 'Гонка', Icons.schedule),
+              _buildIconButton(context, store, 0, 'Новости', Icons.list),
+              _buildIconButton(context, store, 1, 'Гонка', Icons.schedule),
             ],
           ),
         ),
@@ -98,24 +81,22 @@ class SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  Widget _buildIconButton(int idx, String title, IconData iconData) {
+  Widget _buildIconButton(BuildContext context, MainStore store, int idx,
+      String title, IconData iconData) {
     print('_buildIconButton');
-    return Observer(
-      builder: (_) => FlatButton.icon(
-        textColor:
-            _store.screenIndex == idx ? Theme.of(context).accentColor : null,
+    return Obx(
+      () => FlatButton.icon(
+        textColor: store.screenIndex.value == idx
+            ? Theme.of(context).accentColor
+            : null,
         onPressed: () {
-          if (_store.screenIndex != idx) {
-            _store.screenIndex = idx;
+          if (store.screenIndex.value != idx) {
+            store.screenIndex.value = idx;
           }
         },
         icon: Icon(iconData),
         label: Text(title),
       ),
     );
-  }
-
-  void _refresh() {
-    _store.fetch();
   }
 }

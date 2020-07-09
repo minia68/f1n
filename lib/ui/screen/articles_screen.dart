@@ -4,7 +4,7 @@ import 'package:f1n/ui/widget/animated_pageview.dart';
 import 'package:f1n/ui/widget/sliver_fixed_height_persistent_header_delegate.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import 'package:sa_stateless_animation/sa_stateless_animation.dart';
 import 'package:f1n/ui/screen/articles_detail_screen.dart';
 import 'package:animations/animations.dart';
@@ -17,7 +17,7 @@ class ArticlesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final store = Provider.of<MainStore>(context, listen: false);
+    final store = Get.find<MainStore>();
 
     print('build ArticlesScreenState');
     final size = MediaQuery.of(context).size;
@@ -36,9 +36,9 @@ class ArticlesScreen extends StatelessWidget {
           child: SizedBox(
             height: size.height * 0.3,
             child: AnimatedPageView(
-              itemCount: store.f1nFuture.value.main.length,
+              itemCount: store.f1nHome.main.length,
               itemBuilder: (i) =>
-                  _buildMainContainer(store.f1nFuture.value.main[i]),
+                  _buildMainContainer(store.f1nHome.main[i]),
             ),
           ),
         ),
@@ -159,7 +159,7 @@ class ArticlesScreen extends StatelessWidget {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (_, i) {
-          final article = store.f1nFuture.value.latest[i];
+          final article = store.f1nHome.latest[i];
           return _buildOpenContainer(
             ArticleDetailScreen(
               url: article.detailUrl,
@@ -168,7 +168,7 @@ class ArticlesScreen extends StatelessWidget {
             _buildTodayItem(article),
           );
         },
-        childCount: store.f1nFuture.value.latest.length,
+        childCount: store.f1nHome.latest.length,
       ),
     );
   }

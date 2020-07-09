@@ -5,7 +5,7 @@ import 'package:f1n/model/article_detail.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 class ArticleDetailScreen extends StatefulWidget {
   final String url;
@@ -27,7 +27,7 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
   @override
   void initState() {
     super.initState();
-    articleDetail = Provider.of<MainStore>(context, listen: false)
+    articleDetail = Get.find<MainStore>()
         .f1nProvider
         .getArticle(widget.url);
   }
