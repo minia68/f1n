@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
 
   meta: ^1.1.8
+  clock: ^1.0.1
   dio: 3.0.8
   html: ^0.14.0+3
   xml: ^3.6.1
@@ -21,6 +22,7 @@ dependencies:
   sa_stateless_animation: ^1.0.1
   cached_network_image: ^2.2.0+1
   flutter_html: ^1.0.0
+  intl: ^0.16.1
 
   cupertino_icons: ^0.1.3
 

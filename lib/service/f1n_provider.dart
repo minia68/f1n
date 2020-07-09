@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:dio/dio.dart';
 import 'package:f1n/model/article.dart';
 import 'package:f1n/model/article_detail.dart';
@@ -5,6 +6,7 @@ import 'package:f1n/model/f1n_home.dart';
 import 'package:f1n/model/schedule.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart';
+import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -15,8 +17,9 @@ class F1nProvider {
   static final rssUrl = 'https://www.f1news.ru/export/news.xml';
 
   final Dio dio;
+  final Clock _clock;
 
-  F1nProvider(this.dio);
+  F1nProvider(this.dio, {Clock clock = const Clock()}) : _clock = clock;
 
   Future<F1nHome> getHomePage() async {
     try {
@@ -106,39 +109,33 @@ class F1nProvider {
     }
   }
 
-//  List<Article> _parseArticles(Document doc) {
-//    final List<Article> latest = [];
-//    final list = doc.querySelectorAll('.b-home__list .b-news-list__item');
-//    for (final listItem in list) {
-//      final imageUrl = listItem.querySelector('.b-news-list__img')?.attributes;
-//      latest.add(Article(
-//        imageUrl: imageUrl != null ? _setImageUrl(imageUrl['src']) : null,
-//        detailUrl: _setDetailUrl(
-//            listItem.querySelector('.b-news-list__title').attributes['href']),
-//        title: listItem.querySelector('.b-news-list__title').text,
-//        date: listItem.querySelector('.b-news-list__date').text,
-//      ));
-//    }
-//    return latest;
-//  }
-
   List<Article> _parseRss(String data) {
     final result = <Article>[];
     final document = xml.parse(data);
     final items = document.findAllElements('item');
+    final dateFormat = DateFormat('EEE, d MMM yyyy HH:mm:ss');
     for (final item in items) {
       final pubDate = item.findElements('pubDate').single.text.trim();
-      final startIdx = pubDate.indexOf(':') - 2;
       result.add(Article(
         title: item.findElements('title').single.text.trim(),
         imageUrl:
             item.findElements('enclosure').single.getAttribute('url').trim(),
         detailUrl: item.findElements('link').single.text.trim(),
-        date: pubDate.substring(
-            startIdx, startIdx + 5), //TODO implement today time others dd.MM
+        date: getArticleDate(pubDate, dateFormat),
       ));
     }
     return result;
+  }
+  
+  String getArticleDate(String date, DateFormat dateFormat) {
+    final dateTime = dateFormat.parse(date.substring(0, date.length - 6));
+    final now = _clock.now();
+    if (dateTime.year == now.year && dateTime.month == now.month &&
+        dateTime.day == now.day) {
+      return '${_toDoubleDigit(dateTime.hour)}:${_toDoubleDigit(dateTime.minute)}';
+    } else {
+      return '${_toDoubleDigit(dateTime.day)}/${_toDoubleDigit(dateTime.month)}';
+    }
   }
 
   Schedule _getSchedule(Document doc) {
@@ -203,5 +200,9 @@ class F1nProvider {
     final key = '/userfiles/';
     final idx = imageUrl.indexOf(key);
     return '//cdn.f1ne.ws${imageUrl.substring(idx, imageUrl.length)}';
+  }
+
+  String _toDoubleDigit(int number) {
+    return number < 10 ? '0$number' : number.toString();
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:dio/dio.dart';
 import 'package:f1n/model/article.dart';
 import 'package:f1n/model/schedule.dart';
@@ -31,12 +32,15 @@ void main() {
           data: File('test/assets/f1n_news.xml').readAsStringSync(),
         ));
 
-    final f1nHome = await F1nProvider(dio).getHomePage();
+    final f1nHome =
+        await F1nProvider(dio, clock: Clock.fixed(DateTime(2020, 08, 09, 13)))
+            .getHomePage();
     expect(f1nHome.main.length, 7);
     Article article = f1nHome.main[0];
     expect(article.title, 'В Renault объявили о возвращении Фернандо Алонсо');
     expect(article.date, '');
-    expect(article.imageUrl, 'https://cdn.f1ne.ws/userfiles/alonso/145514_sm.jpg');
+    expect(
+        article.imageUrl, 'https://cdn.f1ne.ws/userfiles/alonso/145514_sm.jpg');
     expect(article.detailUrl, 'https://www.f1news.ru/news/f1-145514.html');
 
     article = f1nHome.main[1];
@@ -60,17 +64,23 @@ void main() {
     expect(article.imageUrl, 'https://cdn.f1ne.ws/userfiles/marko/145212.jpg');
     expect(article.detailUrl, 'https://www.f1news.ru/news/f1-145529.html');
 
+    article = f1nHome.latest[2];
+    expect(article.title, 'Гран При Штирии: Пять прямых трансляций');
+    expect(article.date, '00:05');
+    expect(article.imageUrl, 'https://cdn.f1ne.ws/userfiles/119347-22.jpg');
+    expect(article.detailUrl, 'https://www.f1news.ru/news/f1-119347.html');
+
     article = f1nHome.latest[1];
     expect(article.title,
         'Вольфф: При ограничении зарплат важно не потерять лучших');
-    expect(article.date, '10:43');
+    expect(article.date, '19/12');
     expect(article.imageUrl, 'https://cdn.f1ne.ws/userfiles/wolff/143034.jpg');
     expect(article.detailUrl, 'https://www.f1news.ru/news/f1-145528.html');
 
     article = f1nHome.latest[151];
     expect(
         article.title, 'Хэмилтон: Переговоры о контракте даже не начинались');
-    expect(article.date, '11:56');
+    expect(article.date, '04/07');
     expect(
         article.imageUrl, 'https://cdn.f1ne.ws/userfiles/hamilton/145384.jpg');
     expect(article.detailUrl, 'https://www.f1news.ru/news/f1-145384.html');
@@ -129,16 +139,18 @@ void main() {
       options: anyNamed('options'),
       onReceiveProgress: anyNamed('onReceiveProgress'),
     )).thenAnswer((_) async => Response(
-      statusCode: 200,
-      data: File('test/assets/f1n_article_detail.html').readAsStringSync(),
-    ));
+          statusCode: 200,
+          data: File('test/assets/f1n_article_detail.html').readAsStringSync(),
+        ));
 
     final articleDetail = await F1nProvider(dio).getArticle(url);
 
-    expect(articleDetail.title, 'В Renault объявили о возвращении Фернандо Алонсо');
+    expect(articleDetail.title,
+        'В Renault объявили о возвращении Фернандо Алонсо');
     expect(articleDetail.date, '8 июля 2020, 14:02');
     expect(articleDetail.imageUrl, './f1n_article_detail_files/145514.jpg');
-    expect(articleDetail.text, '''<p>В среду Renault официально объявила о том, о чём <a href="https://www.f1news.ru/news/f1-145480.html">говорилось</a> последние дни  – двукратный чемпион мира Фернандо Алонсо вернется в команду в 2021 году. В следующем сезоне испанец вместе с Эстебаном Оконом будет помогать Renault готовиться к 2022 году, когда Формула 1 перейдёт на новый технический регламент.</p>
+    expect(articleDetail.text,
+        '''<p>В среду Renault официально объявила о том, о чём <a href="https://www.f1news.ru/news/f1-145480.html">говорилось</a> последние дни  – двукратный чемпион мира Фернандо Алонсо вернется в команду в 2021 году. В следующем сезоне испанец вместе с Эстебаном Оконом будет помогать Renault готовиться к 2022 году, когда Формула 1 перейдёт на новый технический регламент.</p>
 <p><b>Фернандо Алонсо</b>: «Renault – моя семья, и самые приятные воспоминания связаны с двумя чемпионскими титулами, но сейчас я смотрю в будущее. Меня переполняют эмоции, и я горжусь тем, что возвращаюсь в команду, которая в своё время дала мне шанс начать карьеру, а сейчас даёт возможность вернуться на самый высокий уровень.</p>
 <p>У меня есть принципы и амбиции, которые соответствуют проекту команды. Их прогресс этой зимой подтверждает возможность достижения целей, поставленных на сезон 2022 года. Я готов делиться своим гоночным опытом со всеми в команде – от инженеров до механиков и моих напарников. Команда, как и я, хочет вернуться на подиум».</p>
 <p><b>Сирил Абитебул</b>, управляющий директор Renault Sport Racing: «Контракт с Фернандо Алонсо – часть долгосрочного плана компании Renault, поскольку она остаётся в Формуле&nbsp;1 и стремится вернуться  в лидеры.</p>
