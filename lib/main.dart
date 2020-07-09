@@ -1,6 +1,10 @@
+import 'package:dio/dio.dart';
+import 'package:f1n/service/f1n_provider.dart';
+import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:f1n/splash_screen.dart';
+import 'package:f1n/ui/screen/splash_screen.dart';
+import 'package:get/get.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -8,6 +12,8 @@ void main() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) async {
+    Get.lazyPut<MainStore>(() => MainStore(F1nProvider(Dio()
+      ..interceptors.add(LogInterceptor()))));
     runApp(MyApp());
   });
 }
