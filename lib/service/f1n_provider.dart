@@ -5,12 +5,15 @@ import 'package:f1n/model/f1n_home.dart';
 import 'package:f1n/model/schedule.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart';
+import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
-const _homeUrl = 'https://www.f1news.ru';
-const _rssUrl = 'https://www.f1news.ru/export/news.xml';
-
 class F1nProvider {
+  @visibleForOverriding
+  static final homeUrl = 'https://www.f1news.ru';
+  @visibleForOverriding
+  static final rssUrl = 'https://www.f1news.ru/export/news.xml';
+
   final Dio dio;
 
   F1nProvider(this.dio);
@@ -18,7 +21,7 @@ class F1nProvider {
   Future<F1nHome> getHomePage() async {
     try {
       final response = await dio.get<String>(
-        _homeUrl,
+        homeUrl,
         options: RequestOptions(
           responseType: ResponseType.plain,
           queryParameters: {},
@@ -31,7 +34,7 @@ class F1nProvider {
       _parseMainArticles(doc, main);
 
       final rssResponse = await dio.get<String>(
-        _rssUrl,
+        rssUrl,
         options: RequestOptions(
           responseType: ResponseType.plain,
           queryParameters: {},
@@ -132,7 +135,7 @@ class F1nProvider {
         imageUrl:
             item.findElements('enclosure').single.getAttribute('url').trim(),
         detailUrl: item.findElements('link').single.text.trim(),
-        date: pubDate.substring(startIdx, startIdx + 5),
+        date: pubDate.substring(startIdx, startIdx + 5), //TODO implement today time others dd.MM
       ));
     }
     return result;
@@ -154,7 +157,7 @@ class F1nProvider {
     final events =
         sidebar.querySelectorAll('.stream_list thead').skip(1).toList();
     for (final event in events) {
-      final eventTitle = event.querySelector('.event-item-title').text;
+      final eventTitle = event.querySelector('.event-item-title').text.trim();
       final List<ScheduleEventItem> items = [];
       final eventItems = event.nextElementSibling;
       for (final tr in eventItems.children) {
@@ -190,7 +193,7 @@ class F1nProvider {
   }
 
   String _setDetailUrl(String detailUrl) {
-    return detailUrl.startsWith('http') ? detailUrl : '$_homeUrl$detailUrl';
+    return detailUrl.startsWith('http') ? detailUrl : '$homeUrl$detailUrl';
   }
 
   String _getMainArticleImageUrl(String imageUrl) {
