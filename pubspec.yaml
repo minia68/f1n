@@ -16,7 +16,7 @@ dependencies:
   clock: ^1.0.1
   dio: 3.0.8
   html: ^0.14.0+3
-  xml: ^3.6.1
+  xml: ^4.0.0
   get: ^3.2.2
   animations: ^1.1.1
   sa_stateless_animation: ^1.0.1
