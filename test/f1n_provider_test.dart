@@ -34,9 +34,11 @@ void main() {
               .readAsStringSync(),
         ));
 
-    final f1nProvider =
-        withClock(Clock.fixed(DateTime(2020, 7, 9)), () => F1nProvider(dio));
-    final f1nHome = await f1nProvider.getHomePage();
+    final f1nProvider = F1nProvider(dio);
+    final f1nHome = await withClock(
+      Clock.fixed(DateTime(2020, 7, 9)),
+      () => f1nProvider.getHomePage(),
+    );
     expect(f1nHome.main.length, 7);
     Article article = f1nHome.main[0];
     expect(article.title, 'В Renault объявили о возвращении Фернандо Алонсо');
