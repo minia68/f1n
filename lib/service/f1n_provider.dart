@@ -11,9 +11,9 @@ import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
 class F1nProvider {
-  @visibleForOverriding
+  @visibleForTesting
   static final homeUrl = 'https://www.f1news.ru';
-  @visibleForOverriding
+  @visibleForTesting
   static final rssUrl = 'https://www.f1news.ru/export/news.xml';
 
   final Dio _dio;
@@ -110,18 +110,22 @@ class F1nProvider {
 
   List<Article> _parseRss(String data) {
     final result = <Article>[];
-    final document = xml.parse(data);
+    final document = xml.XmlDocument.parse(data);
     final items = document.findAllElements('item');
     final dateFormat = DateFormat('EEE, d MMM yyyy HH:mm:ss');
     for (final item in items) {
       final pubDate = item.findElements('pubDate').single.text.trim();
-      result.add(Article(
-        title: item.findElements('title').single.text.trim(),
-        imageUrl:
-            item.findElements('enclosure').single.getAttribute('url').trim(),
-        detailUrl: item.findElements('link').single.text.trim(),
-        date: _getArticleDate(pubDate, dateFormat),
-      ));
+      try {
+        result.add(Article(
+          title: item.findElements('title').single.text.trim(),
+          imageUrl:
+          item.findElements('enclosure').single.getAttribute('url').trim(),
+          detailUrl: item.findElements('link').single.text.trim(),
+          date: _getArticleDate(pubDate, dateFormat),
+        ));
+      } catch (e, s) {
+        print(s);
+      }
     }
     return result;
   }

@@ -11,7 +11,27 @@ jobs:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1.3.2
         with:
-          flutter-version: '1.17.3'
+          flutter-version: '1.20.0'
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+  build_deploy:
+    if: github.event_name != 'pull_request'
+    runs-on: macos-latest
+    needs: test
+    name: Build apk
+    steps:
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.20.0'
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - run: flutter pub get
+      - run: flutter build apk
+      - name: Create a Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/flutter-apk/app-release.apk"
+          token: ${{ secrets.GITHUB_TOKEN }}
