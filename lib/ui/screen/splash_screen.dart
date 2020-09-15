@@ -12,12 +12,10 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('build');
-    return GetX<MainStore>(
-      builder: (store) {
-        print('Observer');
-        if (store.error != null) {
-          return Column(
+    return GetBuilder<MainStore>(builder: (store) {
+      if (store.error != null) {
+        return Center(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
@@ -30,26 +28,25 @@ class SplashScreen extends StatelessWidget {
                 child: Text('Обновить'),
               ),
             ],
-          );
-        }
+          ),
+        );
+      }
 
-        if (store.f1nHome == null || store.loading) {
-          return Center(
-            child: Container(
-              width: 48,
-              height: 48,
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
+      if (store.f1nHome == null || store.loading) {
+        return Center(
+          child: Container(
+            width: 48,
+            height: 48,
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
 
-        return _buildBody(context, store);
-      },
-    );
+      return _buildBody(context, store);
+    });
   }
 
   Widget _buildBody(BuildContext context, MainStore store) {
-    print('_buildBody');
     return Scaffold(
       body: SafeArea(
         child: Obx(
@@ -83,7 +80,6 @@ class SplashScreen extends StatelessWidget {
 
   Widget _buildIconButton(BuildContext context, MainStore store, int idx,
       String title, IconData iconData) {
-    print('_buildIconButton');
     return Obx(
       () => FlatButton.icon(
         textColor: store.screenIndex.value == idx

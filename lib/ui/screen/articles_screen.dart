@@ -10,16 +10,10 @@ import 'package:f1n/ui/screen/articles_detail_screen.dart';
 import 'package:animations/animations.dart';
 
 class ArticlesScreen extends StatelessWidget {
-
-  const ArticlesScreen({
-    Key key,
-  }) : super(key: key);
+  final MainStore store = Get.find();
 
   @override
   Widget build(BuildContext context) {
-    final store = Get.find<MainStore>();
-
-    print('build ArticlesScreenState');
     final size = MediaQuery.of(context).size;
     return CustomScrollView(
       slivers: <Widget>[
@@ -37,8 +31,7 @@ class ArticlesScreen extends StatelessWidget {
             height: size.height * 0.3,
             child: AnimatedPageView(
               itemCount: store.f1nHome.main.length,
-              itemBuilder: (i) =>
-                  _buildMainContainer(store.f1nHome.main[i]),
+              itemBuilder: (i) => _buildMainContainer(store.f1nHome.main[i]),
             ),
           ),
         ),
@@ -205,7 +198,9 @@ class ArticlesScreen extends StatelessWidget {
       transitionType: ContainerTransitionType.fade,
       openBuilder: (_, __) => openScreen,
       tappable: true,
-      closedShape: const RoundedRectangleBorder(),
+      closedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
       closedElevation: 0.0,
       closedColor: Colors.transparent,
       openColor: Colors.transparent,
@@ -214,5 +209,3 @@ class ArticlesScreen extends StatelessWidget {
     );
   }
 }
-
-

@@ -6,14 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ScheduleScreen extends StatelessWidget {
-  const ScheduleScreen({
-    Key key,
-  }) : super(key: key);
+  final MainStore store = Get.find();
 
   @override
   Widget build(BuildContext context) {
-    print('build ScheduleScreen');
-    final schedule = Get.find<MainStore>().f1nHome.schedule;
+    final schedule = store.f1nHome.schedule;
     return Column(
       children: <Widget>[
         _buildImage(context, schedule),

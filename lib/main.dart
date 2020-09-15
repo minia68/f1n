@@ -12,8 +12,7 @@ void main() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) async {
-    Get.lazyPut<MainStore>(() => MainStore(F1nProvider(Dio()
-      ..interceptors.add(LogInterceptor()))));
+    Get.lazyPut<MainStore>(() => MainStore(F1nProvider(Dio())));
     runApp(MyApp());
   });
 }

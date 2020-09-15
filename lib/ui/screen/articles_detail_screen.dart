@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f1n/model/article_detail.dart';
+import 'package:f1n/ui/store/article_detail_store.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:get/get.dart';
 
-class ArticleDetailScreen extends StatefulWidget {
+class ArticleDetailScreen extends StatelessWidget {
   final String url;
   final String imageUrl;
 
@@ -20,33 +21,21 @@ class ArticleDetailScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => ArticleDetailScreenState();
-}
-
-class ArticleDetailScreenState extends State<ArticleDetailScreen> {
-  Future<ArticleDetail> articleDetail;
-
-  @override
-  void initState() {
-    super.initState();
-    articleDetail = Get.find<MainStore>().f1nProvider.getArticle(widget.url);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<ArticleDetail>(
-      future: articleDetail,
-      builder: (_, snapshot) {
+    return GetBuilder<ArticleDetailStore>(
+      global: false,
+      init: ArticleDetailStore(Get.find<MainStore>().f1nProvider, url),
+      builder: (store) {
         Widget body;
-        if (snapshot.hasError) {
+        if (store.error != null) {
           body = Center(
-            child: Text(snapshot.error.toString()),
+            child: Text(store.error),
           );
         } else {
           body = _buildBody(
-            !snapshot.hasData ||
-                snapshot.connectionState == ConnectionState.waiting,
-            snapshot.data,
+            store.articleDetail == null || store.loading,
+            store.articleDetail,
+            context,
           );
         }
         return Scaffold(
@@ -57,12 +46,13 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
     );
   }
 
-  Widget _buildBody(bool loading, ArticleDetail articleDetail) {
+  Widget _buildBody(
+      bool loading, ArticleDetail articleDetail, BuildContext context) {
     Widget body;
     if (loading) {
       body = Column(
         children: <Widget>[
-          _buildImage(widget.imageUrl),
+          _buildImage(imageUrl, context),
           SizedBox(height: 26),
           Expanded(
             child: Center(
@@ -79,7 +69,7 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
       body = SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            _buildImage(articleDetail.imageUrl),
+            _buildImage(articleDetail.imageUrl, context),
             _buildTitle(articleDetail.title),
             Text(articleDetail.date),
             SizedBox(
@@ -113,7 +103,7 @@ class ArticleDetailScreenState extends State<ArticleDetailScreen> {
     return body;
   }
 
-  Widget _buildImage(String url) {
+  Widget _buildImage(String url, BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     if (url == null) {
       return SizedBox(
