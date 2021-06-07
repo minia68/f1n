@@ -24,9 +24,9 @@ class F1nProvider {
     try {
       final response = await _dio.get<String>(
         homeUrl,
-        options: RequestOptions(
+        queryParameters: {},
+        options: Options(
           responseType: ResponseType.plain,
-          queryParameters: {},
         ),
       );
 
@@ -37,15 +37,15 @@ class F1nProvider {
 
       final rssResponse = await _dio.get<String>(
         rssUrl,
-        options: RequestOptions(
+        queryParameters: {},
+        options: Options(
           responseType: ResponseType.plain,
-          queryParameters: {},
         ),
       );
 
       return F1nHome(
         main: main,
-        latest: _parseRss(rssResponse.data),
+        latest: _parseRss(rssResponse.data!),
         schedule: _getSchedule(doc),
       );
     } catch (e, s) {
@@ -59,19 +59,19 @@ class F1nProvider {
     try {
       final response = await _dio.get<String>(
         url,
-        options: RequestOptions(
+        queryParameters: {},
+        options: Options(
           responseType: ResponseType.plain,
-          queryParameters: {},
         ),
       );
 
       final doc = parse(response.data);
 
       return ArticleDetail(
-        title: doc.querySelector('.post_title').text,
+        title: doc.querySelector('.post_title')!.text,
         date: doc.querySelector('.post_info .post_date')?.text ?? '',
-        imageUrl: doc.querySelector('.post_thumbnail img').attributes['src'],
-        text: doc.querySelector('.post_content').innerHtml.trim(),
+        imageUrl: doc.querySelector('.post_thumbnail img')?.attributes['src'],
+        text: doc.querySelector('.post_content')!.innerHtml.trim(),
       );
     } catch (e, s) {
       print(e);
@@ -81,15 +81,15 @@ class F1nProvider {
   }
 
   Article _parseMainArticle(Document doc) {
-    final superNews = doc.querySelector('.b-home__wrap .b-home-super-news');
+    final superNews = doc.querySelector('.b-home__wrap .b-home-super-news')!;
     return Article(
       imageUrl: _setImageUrl(superNews
           .querySelector('.b-home-super-news__image')
-          .attributes['src']),
+          ?.attributes['src']),
       detailUrl: _setDetailUrl(superNews
-          .querySelector('.b-home-super-news__link')
-          .attributes['href']),
-      title: superNews.querySelector('.b-home-super-news__title a').text,
+          .querySelector('.b-home-super-news__link')!
+          .attributes['href']!),
+      title: superNews.querySelector('.b-home-super-news__title a')!.text,
       date: '',
     );
   }
@@ -99,10 +99,10 @@ class F1nProvider {
     for (final article in articles) {
       main.add(Article(
         imageUrl: _setImageUrl(_getMainArticleImageUrl(
-            article.querySelector('.article_image img').attributes['src'])),
+            article.querySelector('.article_image img')?.attributes['src'])),
         detailUrl: _setDetailUrl(
-            article.querySelector('.article_title a').attributes['href']),
-        title: article.querySelector('.article_title a').text,
+            article.querySelector('.article_title a')!.attributes['href']!),
+        title: article.querySelector('.article_title a')!.text,
         date: '',
       ));
     }
@@ -119,11 +119,12 @@ class F1nProvider {
         result.add(Article(
           title: item.findElements('title').single.text.trim(),
           imageUrl:
-          item.findElements('enclosure').single.getAttribute('url').trim(),
+              item.findElements('enclosure').single.getAttribute('url')?.trim(),
           detailUrl: item.findElements('link').single.text.trim(),
           date: _getArticleDate(pubDate, dateFormat),
         ));
       } catch (e, s) {
+        print(e);
         print(s);
       }
     }
@@ -132,28 +133,36 @@ class F1nProvider {
 
   Schedule _getSchedule(Document doc) {
     final sidebar = doc.querySelector('.b-main__sidebar');
-    final streamWrap = sidebar.querySelector('.stream_wrap');
+    final streamWrap = sidebar!.querySelector('.stream_wrap');
 
-    final title = streamWrap.querySelector('.stream_title').text;
-    final date = streamWrap.querySelector('.stream_date').text;
+    final title = streamWrap!.querySelector('.stream_title')!.text;
+    final date = streamWrap.querySelector('.stream_date')!.text;
     final dateTime = DateTime.fromMillisecondsSinceEpoch(int.parse(streamWrap
-            .querySelector('.stream_countdown')
-            .attributes['data-timestamp']) *
+            .querySelector('.stream_countdown')!
+            .attributes['data-timestamp']!) *
         1000);
-    final image = _getScheduleImageUrl(streamWrap.attributes['style']);
+    final image = _getScheduleImageUrl(streamWrap.attributes['style']!);
 
     final List<ScheduleEvent> scheduleEvents = [];
-    final events =
-        sidebar.querySelectorAll('.stream_list thead').skip(1).toList();
-    for (final event in events) {
-      final eventTitle = event.querySelector('.event-item-title').text.trim();
+    final titles = sidebar.querySelectorAll('.gp-widget-tabs__title');
+    final contents = sidebar.querySelectorAll('.gp-widget-tabs__content');
+    for (var i = 0; i < titles.length; i++) {
+      final eventTitle =
+          titles[i].querySelector('.gp-widget-tabs__day')!.text.trim() +
+              ' ' +
+              titles[i].querySelector('.gp-widget-tabs__date')!.text.trim();
       final List<ScheduleEventItem> items = [];
-      final eventItems = event.nextElementSibling;
-      for (final tr in eventItems.children) {
-        items.add(ScheduleEventItem(
-          title: tr.querySelector('.event-item').text,
-          date: tr.querySelector('.event-time').text,
-        ));
+      final eventItems = contents[i].querySelectorAll('.gp-widget-item');
+      for (final eventItem in eventItems) {
+        final date =
+            eventItem.querySelector('.gp-widget-item__date')?.text.trim();
+        if (date != null) {
+          items.add(ScheduleEventItem(
+            title:
+                eventItem.querySelector('.gp-widget-item__name')!.text.trim(),
+            date: date,
+          ));
+        }
       }
       scheduleEvents.add(ScheduleEvent(
         title: eventTitle,
@@ -174,7 +183,7 @@ class F1nProvider {
     return imageUrl.substring(idx + 4, imageUrl.length - 2);
   }
 
-  String _setImageUrl(String imageUrl) {
+  String? _setImageUrl(String? imageUrl) {
     if (imageUrl == null) {
       return null;
     }
@@ -185,7 +194,7 @@ class F1nProvider {
     return detailUrl.startsWith('http') ? detailUrl : '$homeUrl$detailUrl';
   }
 
-  String _getMainArticleImageUrl(String imageUrl) {
+  String? _getMainArticleImageUrl(String? imageUrl) {
     if (imageUrl == null) {
       return null;
     }
@@ -197,7 +206,8 @@ class F1nProvider {
   String _getArticleDate(String date, DateFormat dateFormat) {
     final dateTime = dateFormat.parse(date.substring(0, date.length - 6));
     final now = clock.now();
-    if (dateTime.year == now.year && dateTime.month == now.month &&
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
         dateTime.day == now.day) {
       return '${_toDoubleDigit(dateTime.hour)}:${_toDoubleDigit(dateTime.minute)}';
     } else {

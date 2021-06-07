@@ -2,15 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f1n/model/schedule.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:f1n/ui/widget/schedule_timer.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ScheduleScreen extends StatelessWidget {
-  final MainStore store = Get.find();
+  final store = Get.find<MainStore>();
 
   @override
   Widget build(BuildContext context) {
-    final schedule = store.f1nHome.schedule;
+    final schedule = store.f1nHome!.schedule;
     return Column(
       children: <Widget>[
         _buildImage(context, schedule),
@@ -25,10 +26,12 @@ class ScheduleScreen extends StatelessWidget {
           ),
         ),
         SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            children: _buildSchedule(schedule),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              children: _buildSchedule(schedule),
+            ),
           ),
         ),
       ],
@@ -87,15 +90,18 @@ class ScheduleScreen extends StatelessWidget {
   List<Widget> _buildSchedule(Schedule schedule) {
     final List<Widget> result = [];
     for (final event in schedule.events) {
-      result.add(Text(
-        event.title,
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      result.add(Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          event.title,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
       ));
       for (final eventItem in event.items) {
         result.add(Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(16),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               Text(eventItem.title),
               Text(eventItem.date),

@@ -6,11 +6,11 @@ class Schedule {
   final List<ScheduleEvent> events;
 
   Schedule({
-    this.title,
-    this.titleDate,
-    this.date,
-    this.imageUrl,
-    this.events,
+    required this.title,
+    required this.titleDate,
+    required this.date,
+    required this.imageUrl,
+    required this.events,
   });
 }
 
@@ -18,12 +18,12 @@ class ScheduleEvent {
   final String title;
   final List<ScheduleEventItem> items;
 
-  ScheduleEvent({this.title, this.items});
+  ScheduleEvent({required this.title, required this.items});
 }
 
 class ScheduleEventItem {
   final String title;
   final String date;
 
-  ScheduleEventItem({this.title, this.date});
+  ScheduleEventItem({required this.title, required this.date});
 }

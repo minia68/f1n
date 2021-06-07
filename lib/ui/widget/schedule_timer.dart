@@ -7,8 +7,8 @@ class ScheduleTimerWidget extends StatefulWidget {
   final DateTime dateTime;
 
   const ScheduleTimerWidget({
-    Key key,
-    @required this.dateTime,
+    Key? key,
+    required this.dateTime,
   }) : super(key: key);
 
   @override
@@ -16,8 +16,8 @@ class ScheduleTimerWidget extends StatefulWidget {
 }
 
 class ScheduleTimerWidgetState extends State<ScheduleTimerWidget> {
-  Timer timer;
-  String time;
+  Timer? timer;
+  String? time;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class ScheduleTimerWidgetState extends State<ScheduleTimerWidget> {
         ),
         SizedBox(width: 16),
         Text(
-          time,
+          time ?? '',
           style: TextStyle(
             fontSize: 18,
             color: color,

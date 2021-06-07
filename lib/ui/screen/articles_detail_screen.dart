@@ -12,12 +12,12 @@ import 'package:get/get.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   final String url;
-  final String imageUrl;
+  final String? imageUrl;
 
   const ArticleDetailScreen({
-    Key key,
-    @required this.url,
-    @required this.imageUrl,
+    Key? key,
+    required this.url,
+    required this.imageUrl,
   }) : super(key: key);
 
   @override
@@ -29,7 +29,7 @@ class ArticleDetailScreen extends StatelessWidget {
         Widget body;
         if (store.error != null) {
           body = Center(
-            child: Text(store.error),
+            child: Text(store.error!),
           );
         } else {
           body = _buildBody(
@@ -47,9 +47,9 @@ class ArticleDetailScreen extends StatelessWidget {
   }
 
   Widget _buildBody(
-      bool loading, ArticleDetail articleDetail, BuildContext context) {
+      bool loading, ArticleDetail? articleDetail, BuildContext context) {
     Widget body;
-    if (loading) {
+    if (loading || articleDetail == null) {
       body = Column(
         children: <Widget>[
           _buildImage(imageUrl, context),
@@ -81,10 +81,13 @@ class ArticleDetailScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Html(
                   customRender: {
-                    'a': (ctx, widget, style, elem) {
-                      return Text(elem.text, style: TextStyle(fontSize: 16.0));
+                    'a': (ctx, child) {
+                      return Text(
+                        ctx.tree.element?.text ?? 'a',
+                        style: TextStyle(fontSize: 16.0),
+                      );
                     },
-                    'table': (ctx, widget, style, elem) => null,
+                    'table': (ctx, child) => null,
                   },
                   data: articleDetail.text,
                   style: {
@@ -103,7 +106,7 @@ class ArticleDetailScreen extends StatelessWidget {
     return body;
   }
 
-  Widget _buildImage(String url, BuildContext context) {
+  Widget _buildImage(String? url, BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     if (url == null) {
       return SizedBox(

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class SliverFixedHeightPersistentHeaderDelegate
     extends SliverPersistentHeaderDelegate {
   SliverFixedHeightPersistentHeaderDelegate({
-    @required Widget child,
-    @required double height,
+    required Widget child,
+    required double height,
   }) : _child = child, _extent = height;
 
   final Widget _child;

@@ -19,11 +19,11 @@ class SplashScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text(store.error), //TODO normal message
+              Text(store.error!), //TODO normal message
               SizedBox(
                 height: 16.0,
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () => store.fetch(),
                 child: Text('Обновить'),
               ),
@@ -80,19 +80,19 @@ class SplashScreen extends StatelessWidget {
 
   Widget _buildIconButton(BuildContext context, MainStore store, int idx,
       String title, IconData iconData) {
-    return Obx(
-      () => FlatButton.icon(
-        textColor: store.screenIndex.value == idx
-            ? Theme.of(context).accentColor
-            : null,
-        onPressed: () {
-          if (store.screenIndex.value != idx) {
-            store.screenIndex.value = idx;
-          }
-        },
-        icon: Icon(iconData),
-        label: Text(title),
-      ),
-    );
+    return Obx(() => TextButton.icon(
+          style: TextButton.styleFrom(
+            primary: store.screenIndex.value == idx
+                ? Theme.of(context).accentColor
+                : Colors.grey,
+          ),
+          onPressed: () {
+            if (store.screenIndex.value != idx) {
+              store.screenIndex.value = idx;
+            }
+          },
+          icon: Icon(iconData),
+          label: Text(title),
+        ));
   }
 }

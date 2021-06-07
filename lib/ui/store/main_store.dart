@@ -7,16 +7,17 @@ class MainStore extends GetxController {
 
   MainStore(this.f1nProvider);
 
-  var screenIndex = 0.obs;
+  final screenIndex = 0.obs;
 
-  var _f1nHomeState = _F1nHomeState().obs;
+  final _f1nHomeState = _F1nHomeState().obs;
 
-  F1nHome get f1nHome => _f1nHomeState.value.f1nHome;
+  F1nHome? get f1nHome => _f1nHomeState.value.f1nHome;
   bool get loading => _f1nHomeState.value.loading;
-  String get error => _f1nHomeState.value.error;
+  String? get error => _f1nHomeState.value.error;
 
   @override
   void onInit() {
+    super.onInit();
     fetch();
   }
 
@@ -40,9 +41,9 @@ class MainStore extends GetxController {
 }
 
 class _F1nHomeState {
-  final F1nHome f1nHome;
+  final F1nHome? f1nHome;
   final bool loading;
-  final String error;
+  final String? error;
 
   _F1nHomeState({this.f1nHome, this.loading = true, this.error});
 }

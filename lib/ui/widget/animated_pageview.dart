@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:sa_stateless_animation/sa_stateless_animation.dart';
+import 'package:simple_animations/simple_animations.dart';
 
 class AnimatedPageView extends StatefulWidget {
   final int itemCount;
   final Widget Function(int) itemBuilder;
 
   const AnimatedPageView({
-    Key key,
-    @required this.itemCount,
-    @required this.itemBuilder,
+    Key? key,
+    required this.itemCount,
+    required this.itemBuilder,
   }) : super(key: key);
 
   @override

@@ -5,12 +5,12 @@ import 'package:f1n/ui/widget/sliver_fixed_height_persistent_header_delegate.dar
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sa_stateless_animation/sa_stateless_animation.dart';
 import 'package:f1n/ui/screen/articles_detail_screen.dart';
 import 'package:animations/animations.dart';
+import 'package:simple_animations/simple_animations.dart';
 
 class ArticlesScreen extends StatelessWidget {
-  final MainStore store = Get.find();
+  final store = Get.find<MainStore>();
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +30,8 @@ class ArticlesScreen extends StatelessWidget {
           child: SizedBox(
             height: size.height * 0.3,
             child: AnimatedPageView(
-              itemCount: store.f1nHome.main.length,
-              itemBuilder: (i) => _buildMainContainer(store.f1nHome.main[i]),
+              itemCount: store.f1nHome!.main.length,
+              itemBuilder: (i) => _buildMainContainer(store.f1nHome!.main[i]),
             ),
           ),
         ),
@@ -109,10 +109,12 @@ class ArticlesScreen extends StatelessWidget {
       child: Stack(
         children: <Widget>[
           Positioned.fill(
-            child: CachedNetworkImage(
-              imageUrl: article.imageUrl,
-              fit: BoxFit.cover,
-            ),
+            child: article.imageUrl == null
+                ? Container()
+                : CachedNetworkImage(
+                    imageUrl: article.imageUrl!,
+                    fit: BoxFit.cover,
+                  ),
           ),
           Positioned.fill(
             child: Container(
@@ -152,7 +154,7 @@ class ArticlesScreen extends StatelessWidget {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (_, i) {
-          final article = store.f1nHome.latest[i];
+          final article = store.f1nHome!.latest[i];
           return _buildOpenContainer(
             ArticleDetailScreen(
               url: article.detailUrl,
@@ -161,13 +163,13 @@ class ArticlesScreen extends StatelessWidget {
             _buildTodayItem(article),
           );
         },
-        childCount: store.f1nHome.latest.length,
+        childCount: store.f1nHome!.latest.length,
       ),
     );
   }
 
   Widget _buildTodayItem(Article article) {
-    Widget image;
+    Widget? image;
     if (article.imageUrl != null) {
       image = Card(
         margin: const EdgeInsets.all(0),
@@ -179,7 +181,7 @@ class ArticlesScreen extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1.3,
           child: CachedNetworkImage(
-            imageUrl: article.imageUrl,
+            imageUrl: article.imageUrl!,
             fit: BoxFit.cover,
           ),
         ),

@@ -7,8 +7,8 @@ class F1nHome {
   final Schedule schedule;
 
   F1nHome({
-    this.main,
-    this.latest,
-    this.schedule,
+    required this.main,
+    required this.latest,
+    required this.schedule,
   });
 }

@@ -6,16 +6,17 @@ class ArticleDetailStore extends GetxController {
   final F1nProvider f1nProvider;
   final String url;
 
-  var _articleDetailState = _ArticleDetailState().obs;
+  final _articleDetailState = _ArticleDetailState().obs;
 
   ArticleDetailStore(this.f1nProvider, this.url);
 
-  ArticleDetail get articleDetail => _articleDetailState.value.articleDetail;
+  ArticleDetail? get articleDetail => _articleDetailState.value.articleDetail;
   bool get loading => _articleDetailState.value.loading;
-  String get error => _articleDetailState.value.error;
+  String? get error => _articleDetailState.value.error;
 
   @override
   void onInit() {
+    super.onInit();
     fetch();
   }
 
@@ -39,9 +40,9 @@ class ArticleDetailStore extends GetxController {
 }
 
 class _ArticleDetailState {
-  final ArticleDetail articleDetail;
+  final ArticleDetail? articleDetail;
   final bool loading;
-  final String error;
+  final String? error;
 
-  _ArticleDetailState({this.articleDetail, this.loading, this.error});
+  _ArticleDetailState({this.articleDetail, this.loading = true, this.error});
 }

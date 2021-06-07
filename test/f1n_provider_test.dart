@@ -6,33 +6,37 @@ import 'package:f1n/model/article.dart';
 import 'package:f1n/model/schedule.dart';
 import 'package:f1n/service/f1n_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 void main() {
   test('getHomePage test', () async {
-    final dio = MockDio();
-    when(dio.get<String>(
-      F1nProvider.homeUrl,
-      queryParameters: anyNamed('queryParameters'),
-      cancelToken: anyNamed('cancelToken'),
-      options: anyNamed('options'),
-      onReceiveProgress: anyNamed('onReceiveProgress'),
-    )).thenAnswer((_) async => Response(
-          statusCode: 200,
-          data: (await getProjectFile('test/assets/f1n_home.html'))
-              .readAsStringSync(),
-        ));
-    when(dio.get<String>(
-      F1nProvider.rssUrl,
-      queryParameters: anyNamed('queryParameters'),
-      cancelToken: anyNamed('cancelToken'),
-      options: anyNamed('options'),
-      onReceiveProgress: anyNamed('onReceiveProgress'),
-    )).thenAnswer((_) async => Response(
-          statusCode: 200,
-          data: (await getProjectFile('test/assets/f1n_news.xml'))
-              .readAsStringSync(),
-        ));
+    final dio = Dio();
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (
+        RequestOptions options,
+        RequestInterceptorHandler handler,
+      ) async {
+        if (options.path == F1nProvider.homeUrl) {
+          handler.resolve(Response(
+            requestOptions: RequestOptions(path: F1nProvider.homeUrl),
+            statusCode: 200,
+            data: (await getProjectFile('test/assets/f1n_home.html'))
+                .readAsStringSync(),
+          ));
+        } else if (options.path == F1nProvider.rssUrl) {
+          handler.resolve(Response(
+            requestOptions: RequestOptions(path: F1nProvider.rssUrl),
+            statusCode: 200,
+            data: (await getProjectFile('test/assets/f1n_news.xml'))
+                .readAsStringSync(),
+          ));
+        } else {
+          handler.reject(DioError(
+            requestOptions: options,
+            type: DioErrorType.other,
+          ));
+        }
+      },
+    ));
 
     final f1nProvider = F1nProvider(dio);
     final f1nHome = await withClock(
@@ -88,65 +92,103 @@ void main() {
     expect(
         article.imageUrl, 'https://cdn.f1ne.ws/userfiles/hamilton/145384.jpg');
     expect(article.detailUrl, 'https://www.f1news.ru/news/f1-145384.html');
+  });
 
-    expect(f1nHome.schedule.title, 'Гран При Штирии');
-    expect(f1nHome.schedule.titleDate, '10–12 июля. Шпильберг');
+  test('parseSchedule test', () async {
+    final dio = Dio();
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (
+          RequestOptions options,
+          RequestInterceptorHandler handler,
+          ) async {
+        if (options.path == F1nProvider.homeUrl) {
+          handler.resolve(Response(
+            requestOptions: RequestOptions(path: F1nProvider.homeUrl),
+            statusCode: 200,
+            data: (await getProjectFile('test/assets/f1n_home_2021.html'))
+                .readAsStringSync(),
+          ));
+        } else if (options.path == F1nProvider.rssUrl) {
+          handler.resolve(Response(
+            requestOptions: RequestOptions(path: F1nProvider.rssUrl),
+            statusCode: 200,
+            data: (await getProjectFile('test/assets/f1n_news.xml'))
+                .readAsStringSync(),
+          ));
+        } else {
+          handler.reject(DioError(
+            requestOptions: options,
+            type: DioErrorType.other,
+            error: 'wrong test path'
+          ));
+        }
+      },
+    ));
+
+    final f1nProvider = F1nProvider(dio);
+    final f1nHome = await withClock(
+      Clock.fixed(DateTime(2020, 7, 9)),
+          () => f1nProvider.getHomePage(),
+    );
+
+    expect(f1nHome.schedule.title, 'Гран При Франции');
+    expect(f1nHome.schedule.titleDate, '18–20 июня. Поль Рикар');
     expect(f1nHome.schedule.date,
-        DateTime.fromMillisecondsSinceEpoch(1594558800000));
+        DateTime.fromMillisecondsSinceEpoch(1624194000000));
     expect(f1nHome.schedule.imageUrl,
-        'https://cdn.f1ne.ws/build/images/champ/2015/australia.14cb3d69.jpg');
+        'https://cdn.f1ne.ws/build/images/champ/default/france.34b42c3d.jpg');
     expect(f1nHome.schedule.events.length, 3);
     ScheduleEvent event = f1nHome.schedule.events[0];
-    expect(event.title, 'Пятница, 10 июля');
-    expect(event.items.length, 3);
+    expect(event.title, 'Пятница, 4 июня');
+    expect(event.items.length, 2);
     ScheduleEventItem eventItem = event.items[0];
     expect(eventItem.title, '1-я тренировка');
-    expect(eventItem.date, '11:55');
+    expect(eventItem.date, '11:25');
     eventItem = event.items[1];
     expect(eventItem.title, '2-я тренировка');
-    expect(eventItem.date, '15:55');
-    eventItem = event.items[2];
-    expect(eventItem.title, 'Пресс-конференция');
-    expect(eventItem.date, '');
+    expect(eventItem.date, '14:55');
 
     event = f1nHome.schedule.events[1];
-    expect(event.title, 'Суббота, 11 июля');
-    expect(event.items.length, 3);
-    eventItem = event.items[0];
-    expect(eventItem.title, '3-я тренировка');
-    expect(eventItem.date, '12:55');
-    eventItem = event.items[1];
-    expect(eventItem.title, 'Квалификация');
-    expect(eventItem.date, '15:50');
-    eventItem = event.items[2];
-    expect(eventItem.title, 'Пресс-конференция');
-    expect(eventItem.date, '');
-
-    event = f1nHome.schedule.events[2];
-    expect(event.title, 'Воскресенье, 12 июля');
+    expect(event.title, 'Суббота, 5 июня');
     expect(event.items.length, 2);
     eventItem = event.items[0];
-    expect(eventItem.title, 'Стартовое поле');
-    expect(eventItem.date, '');
+    expect(eventItem.title, '3-я тренировка');
+    expect(eventItem.date, '11:55');
     eventItem = event.items[1];
+    expect(eventItem.title, 'Квалификация');
+    expect(eventItem.date, '14:50');
+
+    event = f1nHome.schedule.events[2];
+    expect(event.title, 'Воскресенье, 6 июня');
+    expect(event.items.length, 1);
+    eventItem = event.items[0];
     expect(eventItem.title, 'Гонка');
-    expect(eventItem.date, '16:00');
+    expect(eventItem.date, '14:50');
   });
 
   test('getArticle', () async {
-    final dio = MockDio();
+    final dio = Dio();
     final url = 'detailUrl';
-    when(dio.get<String>(
-      url,
-      queryParameters: anyNamed('queryParameters'),
-      cancelToken: anyNamed('cancelToken'),
-      options: anyNamed('options'),
-      onReceiveProgress: anyNamed('onReceiveProgress'),
-    )).thenAnswer((_) async => Response(
-          statusCode: 200,
-          data: (await getProjectFile('test/assets/f1n_article_detail.html'))
-              .readAsStringSync(),
-        ));
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (
+          RequestOptions options,
+          RequestInterceptorHandler handler,
+          ) async {
+        if (options.path == url) {
+          handler.resolve(Response(
+            requestOptions: RequestOptions(path: url),
+            statusCode: 200,
+            data: (await getProjectFile('test/assets/f1n_article_detail.html'))
+                .readAsStringSync(),
+          ));
+        } else {
+          handler.reject(DioError(
+            requestOptions: options,
+            type: DioErrorType.other,
+          ));
+        }
+      },
+    ));
 
     final articleDetail = await F1nProvider(dio).getArticle(url);
 
@@ -164,8 +206,6 @@ void main() {
 <p>Кроме того, он привнесёт в нашу быстро прогрессирующую команду ту гоночную культуру, которая позволит совместными усилиями преодолеть все препятствия. Его задача – вместе с Эстебаном помочь Renault F1 Team максимально качественно подготовиться к сезону 2022 года».</p>''');
   });
 }
-
-class MockDio extends Mock implements Dio {}
 
 //https://stackoverflow.com/questions/58592859/reading-a-resource-from-a-file-in-a-flutter-test
 Future<File> getProjectFile(String path) async {
