@@ -1,4 +1,4 @@
-package ru.minia.f1n
+package com.example.f1n
 
 import io.flutter.embedding.android.FlutterActivity
 

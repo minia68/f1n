@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f1n/model/schedule.dart';
 import 'package:f1n/ui/store/main_store.dart';
 import 'package:f1n/ui/widget/schedule_timer.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

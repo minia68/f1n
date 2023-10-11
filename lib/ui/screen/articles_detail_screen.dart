@@ -4,10 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f1n/model/article_detail.dart';
 import 'package:f1n/ui/store/article_detail_store.dart';
 import 'package:f1n/ui/store/main_store.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/style.dart';
 import 'package:get/get.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
@@ -80,15 +78,19 @@ class ArticleDetailScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Html(
-                  customRender: {
-                    'a': (ctx, child) {
-                      return Text(
-                        ctx.tree.element?.text ?? 'a',
+                  extensions: [
+                    TagExtension(
+                      tagsToExtend: {'table'},
+                      builder: (ctx) => Container(),
+                    ),
+                    TagExtension(
+                      tagsToExtend: {'a'},
+                      builder: (ctx) => Text(
+                        ctx.element?.text ?? 'a',
                         style: TextStyle(fontSize: 16.0),
-                      );
-                    },
-                    'table': (ctx, child) => null,
-                  },
+                      ),
+                    ),
+                  ],
                   data: articleDetail.text,
                   style: {
                     'p': Style(

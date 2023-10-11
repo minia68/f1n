@@ -20,14 +20,14 @@ class _AnimatedPageViewState extends State<AnimatedPageView> {
 
   @override
   Widget build(BuildContext context) {
-    return PlayAnimation<double>(
+    return PlayAnimationBuilder<double>(
       tween: Tween(
         begin: MediaQuery.of(context).size.width,
         end: 0,
       ),
       curve: Curves.easeIn,
       duration: Duration(milliseconds: 200),
-      builder: (_, child, value) => Transform.translate(
+      builder: (_, value, child) => Transform.translate(
         offset: Offset(value, 0),
         child: child,
       ),

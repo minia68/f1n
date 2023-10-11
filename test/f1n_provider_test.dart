@@ -30,9 +30,9 @@ void main() {
                 .readAsStringSync(),
           ));
         } else {
-          handler.reject(DioError(
+          handler.reject(DioException(
             requestOptions: options,
-            type: DioErrorType.other,
+            type: DioExceptionType.unknown,
           ));
         }
       },
@@ -116,9 +116,9 @@ void main() {
                 .readAsStringSync(),
           ));
         } else {
-          handler.reject(DioError(
+          handler.reject(DioException(
             requestOptions: options,
-            type: DioErrorType.other,
+            type: DioExceptionType.unknown,
             error: 'wrong test path'
           ));
         }
@@ -182,9 +182,9 @@ void main() {
                 .readAsStringSync(),
           ));
         } else {
-          handler.reject(DioError(
+          handler.reject(DioException(
             requestOptions: options,
-            type: DioErrorType.other,
+            type: DioExceptionType.unknown,
           ));
         }
       },

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:f1n/ui/screen/articles_detail_screen.dart';
 import 'package:animations/animations.dart';
-import 'package:simple_animations/simple_animations.dart';
 
 class ArticlesScreen extends StatelessWidget {
   final store = Get.find<MainStore>();
@@ -51,16 +50,16 @@ class ArticlesScreen extends StatelessWidget {
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          // TODO possible change to translate
-          child: PlayAnimation<double>(
-            duration: Duration(milliseconds: 200),
-            tween: Tween(begin: 0.6, end: 0.0),
-            builder: (_, __, value) => Container(
-              height: size.height * value,
-            ),
-          ),
-        ),
+        // SliverToBoxAdapter(
+        //   // TODO possible change to translate
+        //   child: PlayAnimationBuilder<double>(
+        //     duration: Duration(milliseconds: 200),
+        //     tween: Tween(begin: 0.6, end: 0.0),
+        //     builder: (_, value, __,) => Container(
+        //       height: size.height * value,
+        //     ),
+        //   ),
+        // ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           sliver: _buildToday(store),

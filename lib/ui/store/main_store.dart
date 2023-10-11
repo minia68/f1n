@@ -23,6 +23,7 @@ class MainStore extends GetxController {
 
   Future fetch() async {
     _f1nHomeState.value = _F1nHomeState();
+    update();
     try {
       _f1nHomeState.value = _F1nHomeState(
         loading: false,

@@ -82,8 +82,8 @@ class SplashScreen extends StatelessWidget {
       String title, IconData iconData) {
     return Obx(() => TextButton.icon(
           style: TextButton.styleFrom(
-            primary: store.screenIndex.value == idx
-                ? Theme.of(context).accentColor
+            foregroundColor: store.screenIndex.value == idx
+                ? Theme.of(context).colorScheme.secondary
                 : Colors.grey,
           ),
           onPressed: () {

@@ -70,7 +70,8 @@ class F1nProvider {
       return ArticleDetail(
         title: doc.querySelector('.post_title')!.text,
         date: doc.querySelector('.post_info .post_date')?.text ?? '',
-        imageUrl: doc.querySelector('.post_thumbnail img')?.attributes['src'],
+        imageUrl: _setImageUrl(
+            doc.querySelector('.post_thumbnail img')?.attributes['src']),
         text: doc.querySelector('.post_content')!.innerHtml.trim(),
       );
     } catch (e, s) {
@@ -114,13 +115,13 @@ class F1nProvider {
     final items = document.findAllElements('item');
     final dateFormat = DateFormat('EEE, d MMM yyyy HH:mm:ss');
     for (final item in items) {
-      final pubDate = item.findElements('pubDate').single.text.trim();
+      final pubDate = item.findElements('pubDate').single.innerText.trim();
       try {
         result.add(Article(
-          title: item.findElements('title').single.text.trim(),
+          title: item.findElements('title').single.innerText.trim(),
           imageUrl:
               item.findElements('enclosure').single.getAttribute('url')?.trim(),
-          detailUrl: item.findElements('link').single.text.trim(),
+          detailUrl: item.findElements('link').single.innerText.trim(),
           date: _getArticleDate(pubDate, dateFormat),
         ));
       } catch (e, s) {
@@ -200,7 +201,8 @@ class F1nProvider {
     }
     final key = '/userfiles/';
     final idx = imageUrl.indexOf(key);
-    return '//cdn.f1ne.ws${imageUrl.substring(idx, imageUrl.length)}';
+    final str = imageUrl.substring(idx, imageUrl.length);
+    return imageUrl.contains('cdn.f1ne.ws') ? str : '//cdn.f1ne.ws$str';
   }
 
   String _getArticleDate(String date, DateFormat dateFormat) {

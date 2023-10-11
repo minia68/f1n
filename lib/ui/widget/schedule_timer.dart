@@ -40,7 +40,7 @@ class ScheduleTimerWidgetState extends State<ScheduleTimerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).accentColor;
+    final color = Theme.of(context).colorScheme.secondary;
     return Row(
       children: <Widget>[
         Icon(

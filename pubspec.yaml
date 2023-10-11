@@ -3,28 +3,27 @@ description: f1news
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.1.0+2
+version: 1.2.0+2
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=3.0.5 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  meta: ^1.3.0
-  clock: ^1.1.0
-  dio: 4.0.0
-  html: ^0.15.0
-  xml: ^5.1.1
-  get: ^4.1.4
-  animations: ^2.0.0
-  simple_animations: ^3.1.1
-  cached_network_image: ^3.0.0
-  flutter_html: ^2.0.0
-  intl: ^0.17.0
+  clock: ^1.1.1
+  dio: 5.3.3
+  html: ^0.15.4
+  xml: ^6.3.0
+  get: ^4.6.5
+  animations: ^2.0.8
+  simple_animations: ^5.0.2
+  cached_network_image: ^3.3.0
+  flutter_html: ^3.0.0-beta.2
+  intl: ^0.18.1
 
-  cupertino_icons: ^1.0.3
+  cupertino_icons: ^1.0.6
 
 dev_dependencies:
   flutter_test:
